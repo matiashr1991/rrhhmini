@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  backend_api:
+    image: rrhh_backend:${RRHH_BACKEND_VERSION}
+    environment:
+      PORT: "8000"
+      HIK_API_BASE: "${HIK_API_BASE}"
+      HIK_API_KEY: "${HIK_API_KEY}"
+      HIK_POLL_INTERVAL_MS: "${HIK_POLL_INTERVAL_MS}"
+      HIK_POLL_LIMIT: "${HIK_POLL_LIMIT}"
+
+      DB_HOST: "172.18.0.1"
+      DB_PORT: "3306"
+      DB_USERNAME: "rrhh"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_DATABASE: "rrhh_moderno"
+
+      JWT_SECRET: "${JWT_SECRET}"
+    networks:
+      - matdevnet
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=matdevnet"
+
+        - "traefik.http.routers.rrhh-api.rule=Host(`rrhh.mmatdev.com`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.rrhh-api.entrypoints=websecure"
+        - "traefik.http.routers.rrhh-api.tls=true"
+        - "traefik.http.routers.rrhh-api.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.rrhh-api.priority=100"
+
+        - "traefik.http.middlewares.rrhh-api-stripprefix.stripprefix.prefixes=/api"
+        - "traefik.http.routers.rrhh-api.middlewares=rrhh-api-stripprefix"
+
+        - "traefik.http.services.rrhh-api.loadbalancer.server.port=8000"
+
+  frontend_web:
+    image: rrhh_frontend:${RRHH_FRONTEND_VERSION}
+    networks:
+      - matdevnet
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=matdevnet"
+
+        - "traefik.http.routers.rrhh.rule=Host(`rrhh.mmatdev.com`)"
+        - "traefik.http.routers.rrhh.entrypoints=websecure"
+        - "traefik.http.routers.rrhh.tls=true"
+        - "traefik.http.routers.rrhh.tls.certresolver=letsencryptresolver"
+
+        - "traefik.http.services.rrhh.loadbalancer.server.port=3000"
+
+networks:
+  matdevnet:
+    external: true
