@@ -134,3 +134,15 @@ dist/
 backend/.env
 backend/.env.*
 !backend/.env.example
+
+# ---- basura accidental de outputs docker build ----
+[Cc]ACHED
+[[]builder
+[[]deps
+[[]internal]
+[[]runner
+exporting
+naming
+resolve
+transferring
+unpacking
