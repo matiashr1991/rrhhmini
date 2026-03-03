@@ -1,29 +1,23 @@
 import axios from 'axios';
 
-// Prod: Traefik -> /api
-// Dev: podés setear NEXT_PUBLIC_API_URL=http://localhost:8000
+// Prod: Traefik rutea /api → backend NestJS
+// Dev:  setear NEXT_PUBLIC_API_URL=http://localhost:8000
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 const api = axios.create({
-  baseURL,
-  withCredentials: true,
+    baseURL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
-// Agregar JWT automáticamente (solo en navegador)
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token =
-      localStorage.getItem('access_token') ||
-      localStorage.getItem('token') ||
-      sessionStorage.getItem('access_token') ||
-      sessionStorage.getItem('token');
-
+    const token = localStorage.getItem('token');
     if (token) {
-      config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
     }
-  }
-  return config;
+    return config;
 });
 
 export default api;
