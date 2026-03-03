@@ -148,7 +148,7 @@ export default function MyLeavesPage() {
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm font-medium w-full sm:w-auto"
+                    className="bg-eco-700 text-white px-4 py-2 rounded-lg hover:bg-eco-800 transition flex items-center justify-center gap-2 shadow-sm font-medium w-full sm:w-auto"
                 >
                     <Plus size={18} />
                     Nueva Solicitud
@@ -169,7 +169,7 @@ export default function MyLeavesPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia</label>
                                 <select
                                     required
-                                    className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 outline-none"
                                     value={newRequest.typeId}
                                     onChange={e => setNewRequest({ ...newRequest, typeId: e.target.value })}
                                 >
@@ -185,7 +185,7 @@ export default function MyLeavesPage() {
                                     <input
                                         type="date"
                                         required
-                                        className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                        className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 outline-none"
                                         value={newRequest.startDate}
                                         onChange={e => setNewRequest({ ...newRequest, startDate: e.target.value })}
                                     />
@@ -195,7 +195,7 @@ export default function MyLeavesPage() {
                                     <input
                                         type="date"
                                         required
-                                        className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                        className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 outline-none"
                                         value={newRequest.endDate}
                                         onChange={e => setNewRequest({ ...newRequest, endDate: e.target.value })}
                                     />
@@ -206,7 +206,7 @@ export default function MyLeavesPage() {
                             {loadingBalance ? (
                                 <div className="text-sm text-gray-500">Calculando saldo disponible...</div>
                             ) : balanceInfo ? (
-                                <div className={`p-3 rounded-lg text-sm border ${balanceInfo.remainingDays > 0 ? 'bg-blue-50 border-blue-100 text-blue-800' : 'bg-red-50 border-red-100 text-red-800'}`}>
+                                <div className={`p-3 rounded-lg text-sm border ${balanceInfo.remainingDays > 0 ? 'bg-eco-50 border-eco-100 text-eco-900' : 'bg-red-50 border-red-100 text-red-800'}`}>
                                     <strong>Saldo de días:</strong> Te quedan <strong>{balanceInfo.remainingDays}</strong> de {balanceInfo.maxDays} días para este año.
                                     {/* Ignore TS error on limitReason since it works in runtime, but cast safely anyway */}
                                     {(balanceInfo as any).limitReason && (
@@ -227,7 +227,7 @@ export default function MyLeavesPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
                                 <textarea
                                     required
-                                    className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 outline-none"
                                     rows={3}
                                     value={newRequest.reason}
                                     onChange={e => setNewRequest({ ...newRequest, reason: e.target.value })}
@@ -245,7 +245,7 @@ export default function MyLeavesPage() {
                                 <button
                                     type="submit"
                                     disabled={submitting || isExceeded}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 bg-eco-700 text-white rounded-lg hover:bg-eco-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {submitting ? 'Enviando...' : 'Enviar Solicitud'}
                                 </button>

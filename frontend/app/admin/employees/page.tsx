@@ -65,7 +65,7 @@ export default function EmployeesPage() {
                 </div>
                 <Link
                     href="/admin/employees/new"
-                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 font-medium"
+                    className="flex items-center gap-2 bg-eco-700 text-white px-5 py-2.5 rounded-xl hover:bg-eco-800 transition shadow-lg shadow-eco-700/20 font-medium"
                 >
                     <UserPlus size={20} />
                     Nuevo Empleado
@@ -80,7 +80,7 @@ export default function EmployeesPage() {
                         <input
                             type="text"
                             placeholder="Buscar por nombre, legajo o DNI..."
-                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-gray-900"
+                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 transition text-gray-900"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -105,7 +105,7 @@ export default function EmployeesPage() {
                             ) : filteredEmployees.length === 0 ? (
                                 <tr><td colSpan={6} className="p-8 text-center text-gray-500">No se encontraron empleados.</td></tr>
                             ) : filteredEmployees.map((emp) => (
-                                <tr key={emp.id} className="hover:bg-blue-50/30 transition group">
+                                <tr key={emp.id} className="hover:bg-eco-50/30 transition group">
                                     <td className="p-4 pl-6 font-mono text-gray-600">{emp.employeeKey}</td>
                                     <td className="p-4">
                                         <div className="font-medium text-gray-900">{emp.lastName}, {emp.firstName}</div>
@@ -121,7 +121,7 @@ export default function EmployeesPage() {
                                     </td>
                                     <td className="p-4 text-right pr-6">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Link href={`/admin/employees/${emp.id}/edit`} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                            <Link href={`/admin/employees/${emp.id}/edit`} className="p-2 text-gray-400 hover:text-eco-700 hover:bg-eco-50 rounded-lg transition">
                                                 <Pencil size={18} />
                                             </Link>
                                             <button

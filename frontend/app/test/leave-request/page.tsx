@@ -73,7 +73,7 @@ export default function TestLeaveRequestPage() {
                         required
                     />
                 </div>
-                <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">Enviar Solicitud</button>
+                <button type="submit" className="w-full bg-eco-700 text-white p-2 rounded">Enviar Solicitud</button>
             </form>
         </div>
     );

@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationBell from '@/components/NotificationBell';
+import EcologiaLogo from '@/components/EcologiaLogo';
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
@@ -41,18 +42,26 @@ export default function AdminLayout({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-eco-50 flex">
             {/* Sidebar */}
             <aside
-                className={`bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     } md:relative md:translate-x-0`}
+                style={{
+                    background: 'linear-gradient(180deg, #2C4A38 0%, #3E6C51 100%)',
+                }}
             >
                 <div className="h-full flex flex-col">
-                    <div className="h-16 flex items-center px-6 border-b border-gray-100">
-                        <span className="text-xl font-bold text-blue-600">Sistema<span className="text-gray-900">RRHH</span></span>
+                    {/* Logo area */}
+                    <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10">
+                        <EcologiaLogo size={36} />
+                        <div className="leading-none">
+                            <span className="text-sm font-bold text-white tracking-wide block">ECOLOGÍA</span>
+                            <span className="text-[10px] font-medium text-eco-300 tracking-widest block">MISIONES · RRHH</span>
+                        </div>
                     </div>
 
-                    <nav className="flex-1 px-4 py-6 space-y-1">
+                    <nav className="flex-1 px-3 py-5 space-y-0.5">
                         {sidebarItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = pathname.startsWith(item.href);
@@ -60,24 +69,24 @@ export default function AdminLayout({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${isActive
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 ${isActive
+                                        ? 'bg-white/15 text-white shadow-sm shadow-black/10'
+                                        : 'text-eco-200 hover:bg-white/8 hover:text-white'
                                         }`}
                                 >
-                                    <Icon size={20} />
+                                    <Icon size={19} />
                                     {item.label}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    <div className="p-4 border-t border-gray-100">
+                    <div className="p-3 border-t border-white/10">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition w-full"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-lapacho-300 rounded-xl hover:bg-lapacho-500/15 hover:text-lapacho-200 transition w-full"
                         >
-                            <LogOut size={20} />
+                            <LogOut size={19} />
                             Cerrar Sesión
                         </button>
                     </div>
@@ -86,25 +95,25 @@ export default function AdminLayout({
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-white border-b border-gray-200 h-16 flex items-center px-8 justify-between sticky top-0 z-40">
+                <header className="bg-white border-b border-eco-100 h-14 flex items-center px-6 justify-between sticky top-0 z-40 shadow-sm shadow-eco-900/5">
                     <button
-                        className="md:hidden p-2 text-gray-500"
+                        className="md:hidden p-2 text-eco-600 hover:text-eco-800 transition"
                         onClick={() => setSidebarOpen(!isSidebarOpen)}
                     >
-                        <Menu size={24} />
+                        <Menu size={22} />
                     </button>
-                    <div className="text-sm text-gray-500">Panel de Administración</div>
-                    <div className="flex items-center gap-4">
+                    <div className="text-sm text-eco-500 font-medium">Panel de Administración</div>
+                    <div className="flex items-center gap-3">
                         <NotificationBell target="admin" />
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-eco-100 flex items-center justify-center text-eco-700 font-bold text-xs border border-eco-200">
                             AD
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="hidden md:flex p-2 text-gray-400 hover:text-red-600 transition"
+                            className="hidden md:flex p-2 text-eco-400 hover:text-lapacho-500 transition"
                             title="Cerrar Sesión"
                         >
-                            <LogOut size={20} />
+                            <LogOut size={18} />
                         </button>
                     </div>
                 </header>

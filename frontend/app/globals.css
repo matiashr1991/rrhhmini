@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+
+  /* ── Ecología Misiones palette ── */
+  --color-eco-900: #1E3528;
+  --color-eco-800: #2C4A38;
+  --color-eco-700: #3E6C51;
+  --color-eco-600: #4A7D5E;
+  --color-eco-500: #5A9270;
+  --color-eco-400: #7DB395;
+  --color-eco-300: #A3CCBA;
+  --color-eco-200: #C8E0D4;
+  --color-eco-100: #E2EFE8;
+  --color-eco-50:  #F0F7F3;
+
+  /* Rosa Lapacho accent */
+  --color-lapacho-600: #B8607D;
+  --color-lapacho-500: #D4839B;
+  --color-lapacho-400: #E0A0B3;
+  --color-lapacho-300: #EABDC9;
+  --color-lapacho-200: #F2D6DF;
+  --color-lapacho-100: #F9ECF0;
+  --color-lapacho-50:  #FCF5F7;
+
+  /* Oliva */
+  --color-oliva-600: #4A6830;
+  --color-oliva-500: #5A7A3A;
+  --color-oliva-400: #7A9A5A;
+
+  /* Arena (beige) */
+  --color-arena-100: #F5F0E8;
+  --color-arena-50:  #FAF8F4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #F0F7F3;
+  --foreground: #1E3528;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Scrollbar Styling ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #A3CCBA; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #7DB395; }
+
+/* ── Selection Styling ── */
+::selection { background: #D4839B40; color: #1E3528; }
+
+/* ── Focus outlines ── */
+*:focus-visible {
+  outline: 2px solid #3E6C51;
+  outline-offset: 2px;
 }

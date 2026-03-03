@@ -164,7 +164,7 @@ export default function LeaveRequestsPage() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+                        className="bg-eco-700 text-white px-4 py-2 rounded-lg hover:bg-eco-800 transition flex items-center gap-2 shadow-sm"
                     >
                         <Calendar size={18} /> Nueva Solicitud
                     </button>
@@ -188,25 +188,25 @@ export default function LeaveRequestsPage() {
             <div className="flex border-b border-gray-200 mb-8 overflow-x-auto space-x-8">
                 <button
                     onClick={() => setActiveTab('requests')}
-                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'requests' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
+                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'requests' ? 'border-b-2 border-eco-700 text-eco-700' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
                 >
                     <Calendar size={18} /> Solicitudes Activas
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
+                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'history' ? 'border-b-2 border-eco-700 text-eco-700' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
                 >
                     <History size={18} /> Historial
                 </button>
                 <button
                     onClick={() => setActiveTab('quotas')}
-                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'quotas' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
+                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'quotas' ? 'border-b-2 border-eco-700 text-eco-700' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
                 >
                     <PiggyBank size={18} /> Cupos Máximos
                 </button>
                 <button
                     onClick={() => setActiveTab('types')}
-                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'types' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
+                    className={`pb-4 text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${activeTab === 'types' ? 'border-b-2 border-eco-700 text-eco-700' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}
                 >
                     <Settings2 size={18} /> Tipos de Licencia
                 </button>
@@ -321,7 +321,7 @@ export default function LeaveRequestsPage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                    className="px-4 py-2 bg-eco-700 text-white rounded-lg hover:bg-eco-800 transition"
                                 >
                                     Guardar Licencia
                                 </button>
@@ -361,7 +361,7 @@ export default function LeaveRequestsPage() {
                                             <div className="text-gray-500 text-xs">Legajo: {req.employee?.employeeKey}</div>
                                         </td>
                                         <td className="p-4">
-                                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-eco-50 text-eco-800 border border-eco-100">
                                                 {req.type?.name || 'Otro'}
                                             </span>
                                         </td>

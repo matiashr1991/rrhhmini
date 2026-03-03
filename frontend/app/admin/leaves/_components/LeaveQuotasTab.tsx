@@ -90,7 +90,7 @@ export default function LeaveQuotasTab({ employees, leaveTypes }: { employees: a
                         />
                     </div>
                     <div>
-                        <button type="submit" className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 transition">
+                        <button type="submit" className="w-full flex justify-center items-center gap-2 bg-eco-700 text-white rounded-lg p-2 hover:bg-eco-800 transition">
                             <Save size={18} /> Guardar
                         </button>
                     </div>
@@ -127,7 +127,7 @@ export default function LeaveQuotasTab({ employees, leaveTypes }: { employees: a
                         ) : quotas.map(q => (
                             <tr key={q.id} className="hover:bg-gray-50">
                                 <td className="p-4 font-medium text-gray-900">{q.employee?.lastName}, {q.employee?.firstName}</td>
-                                <td className="p-4 text-blue-600">{q.leaveType?.name}</td>
+                                <td className="p-4 text-eco-700">{q.leaveType?.name}</td>
                                 <td className="p-4 text-center font-bold text-gray-800">{q.maxDays}</td>
                             </tr>
                         ))}
