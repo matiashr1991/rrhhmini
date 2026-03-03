@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogOut, User, Menu, X, Clock } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
+import EcologiaLogo from '@/components/EcologiaLogo';
 
 export default function PortalLayout({
     children,
@@ -20,7 +21,7 @@ export default function PortalLayout({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-eco-50 flex">
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
@@ -31,43 +32,52 @@ export default function PortalLayout({
 
             {/* Sidebar */}
             <aside
-                className={`bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     } md:translate-x-0 md:static md:block`}
+                style={{
+                    background: 'linear-gradient(180deg, #2C4A38 0%, #3E6C51 100%)',
+                }}
             >
                 <div className="h-full flex flex-col">
-                    <div className="h-16 flex items-center px-6 border-b border-gray-100 justify-between">
-                        <span className="text-xl font-bold text-blue-600 tracking-tight">Portal<span className="text-gray-900">Empleado</span></span>
-                        <div className="flex items-center gap-4">
+                    <div className="h-16 flex items-center px-5 border-b border-white/10 justify-between">
+                        <div className="flex items-center gap-3">
+                            <EcologiaLogo size={32} />
+                            <div className="leading-none">
+                                <span className="text-sm font-bold text-white tracking-wide block">Portal</span>
+                                <span className="text-[10px] font-medium text-eco-300 tracking-widest block">EMPLEADO</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
                             <span className="hidden md:block"><NotificationBell target="employee" /></span>
-                            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-400">
-                                <X size={24} />
+                            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-eco-300 hover:text-white transition">
+                                <X size={22} />
                             </button>
                         </div>
                     </div>
-                    <nav className="flex-1 p-4 space-y-1">
+                    <nav className="flex-1 p-3 space-y-0.5">
                         <Link
                             href="/portal/dashboard"
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition mb-1"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-eco-200 rounded-xl hover:bg-white/8 hover:text-white transition"
                             onClick={() => setSidebarOpen(false)}
                         >
-                            <User size={20} />
+                            <User size={19} />
                             Mi Perfil
                         </Link>
                         <Link
                             href="/portal/leaves"
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-blue-600 bg-blue-50 rounded-xl transition"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-white bg-white/15 rounded-xl shadow-sm shadow-black/10 transition"
                             onClick={() => setSidebarOpen(false)}
                         >
-                            <Clock size={20} />
+                            <Clock size={19} />
                             Mis Licencias
                         </Link>
                     </nav>
-                    <div className="p-4 border-t border-gray-100">
+                    <div className="p-3 border-t border-white/10">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition w-full"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-lapacho-300 rounded-xl hover:bg-lapacho-500/15 hover:text-lapacho-200 transition w-full"
                         >
-                            <LogOut size={20} />
+                            <LogOut size={19} />
                             Cerrar Sesión
                         </button>
                     </div>
@@ -76,11 +86,14 @@ export default function PortalLayout({
 
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Mobile Header */}
-                <header className="md:hidden bg-white border-b border-gray-200 h-16 flex items-center px-4 justify-between sticky top-0 z-30">
-                    <button className="p-2 text-gray-600" onClick={() => setSidebarOpen(!isSidebarOpen)}>
-                        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                <header className="md:hidden bg-white border-b border-eco-100 h-14 flex items-center px-4 justify-between sticky top-0 z-30 shadow-sm shadow-eco-900/5">
+                    <button className="p-2 text-eco-600" onClick={() => setSidebarOpen(!isSidebarOpen)}>
+                        {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
                     </button>
-                    <span className="font-bold text-lg text-blue-600">Portal</span>
+                    <div className="flex items-center gap-2">
+                        <EcologiaLogo size={24} />
+                        <span className="font-bold text-sm text-eco-700">Portal</span>
+                    </div>
                     <NotificationBell target="employee" />
                 </header>
 

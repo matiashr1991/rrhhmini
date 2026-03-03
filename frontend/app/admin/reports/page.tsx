@@ -232,7 +232,7 @@ export default function ReportsPage() {
     };
 
     const getStatusColor = (status: string, isLate: boolean) => {
-        if (status === 'LICENSE') return 'bg-blue-100 text-blue-800';
+        if (status === 'LICENSE') return 'bg-eco-100 text-eco-900';
         if (status === 'HOLIDAY') return 'bg-purple-100 text-purple-800';
         if (status === 'OFF') return 'bg-gray-100 text-gray-800';
         if (status === 'PRESENT') return isLate ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
@@ -248,25 +248,25 @@ export default function ReportsPage() {
             <div className="flex gap-4 border-b border-gray-200 mb-8 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('daily')}
-                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'daily' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'daily' ? 'text-eco-700 border-b-2 border-eco-700' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                     Reporte Diario
                 </button>
                 <button
                     onClick={() => setActiveTab('monthly')}
-                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'monthly' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'monthly' ? 'text-eco-700 border-b-2 border-eco-700' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                     Reporte Mensual
                 </button>
                 <button
                     onClick={() => setActiveTab('config')}
-                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'config' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'config' ? 'text-eco-700 border-b-2 border-eco-700' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                     Configuración
                 </button>
                 <button
                     onClick={() => setActiveTab('holidays')}
-                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'holidays' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-4 px-4 font-medium transition whitespace-nowrap ${activeTab === 'holidays' ? 'text-eco-700 border-b-2 border-eco-700' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                     Feriados y No Laborables
                 </button>
@@ -312,7 +312,7 @@ export default function ReportsPage() {
                             <div className="text-2xl font-bold">{dailyData.filter(d => d.status === 'ABSENT').length}</div>
                         </div>
                         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div className="text-blue-600 text-sm mb-1">Licencias</div>
+                            <div className="text-eco-700 text-sm mb-1">Licencias</div>
                             <div className="text-2xl font-bold">{dailyData.filter(d => d.status === 'LICENSE').length}</div>
                         </div>
                     </div>
@@ -405,7 +405,7 @@ export default function ReportsPage() {
                                             <td className="p-4 text-gray-700">{row.employee.name}</td>
                                             <td className="p-4 text-green-600 font-medium">{row.stats.present}</td>
                                             <td className="p-4 text-red-600 font-medium">{row.stats.absent}</td>
-                                            <td className="p-4 text-blue-600 font-medium">{row.stats.license}</td>
+                                            <td className="p-4 text-eco-700 font-medium">{row.stats.license}</td>
                                             <td className="p-4 text-gray-900 font-bold">{row.stats.averageHours}</td>
                                         </tr>
                                     ))
@@ -425,7 +425,7 @@ export default function ReportsPage() {
                                 type="checkbox"
                                 checked={config.isEnabled}
                                 onChange={(e) => setConfig({ ...config, isEnabled: e.target.checked })}
-                                className="w-5 h-5 text-blue-600 rounded"
+                                className="w-5 h-5 text-eco-700 rounded"
                             />
                         </div>
 
@@ -436,7 +436,7 @@ export default function ReportsPage() {
                                         type="checkbox"
                                         checked={config.dailyReportEnabled}
                                         onChange={(e) => setConfig({ ...config, dailyReportEnabled: e.target.checked })}
-                                        className="w-4 h-4 text-blue-600 rounded"
+                                        className="w-4 h-4 text-eco-700 rounded"
                                     />
                                     <span className="text-sm font-medium text-gray-700">Reporte Diario (lunes a domingo)</span>
                                 </label>
@@ -445,7 +445,7 @@ export default function ReportsPage() {
                                         type="checkbox"
                                         checked={config.monthlyReportEnabled}
                                         onChange={(e) => setConfig({ ...config, monthlyReportEnabled: e.target.checked })}
-                                        className="w-4 h-4 text-blue-600 rounded"
+                                        className="w-4 h-4 text-eco-700 rounded"
                                     />
                                     <span className="text-sm font-medium text-gray-700">Reporte Mensual (el día 1 de cada mes)</span>
                                 </label>
@@ -476,7 +476,7 @@ export default function ReportsPage() {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+                            className="w-full bg-eco-700 text-white px-4 py-2 rounded-xl hover:bg-eco-800 transition"
                         >
                             Guardar Configuración
                         </button>
@@ -487,7 +487,7 @@ export default function ReportsPage() {
             {activeTab === 'holidays' && (
                 <div className="max-w-4xl space-y-6 animate-in fade-in duration-300">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Calendar size={20} className="text-blue-600" /> Agregar Feriado / No Laborable</h2>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Calendar size={20} className="text-eco-700" /> Agregar Feriado / No Laborable</h2>
                         <form onSubmit={handleAddHoliday} className="flex flex-col md:flex-row gap-4 items-end">
                             <div className="w-full md:w-1/3 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Fecha</label>
@@ -511,7 +511,7 @@ export default function ReportsPage() {
                                 />
                             </div>
                             <div className="w-full md:w-auto">
-                                <button type="submit" className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                                <button type="submit" className="w-full bg-eco-700 text-white px-6 py-2 rounded-lg hover:bg-eco-800 transition flex items-center gap-2">
                                     <Save size={18} /> Guardar
                                 </button>
                             </div>
@@ -531,7 +531,7 @@ export default function ReportsPage() {
                                 {holidays.map(h => {
                                     const dateObj = new Date(h.date + 'T12:00:00');
                                     return (
-                                        <tr key={h.id} className="hover:bg-blue-50/50 transition">
+                                        <tr key={h.id} className="hover:bg-eco-50/50 transition">
                                             <td className="p-4 pl-6 font-medium text-gray-900">
                                                 {dateObj.toLocaleDateString('es-AR')}
                                             </td>

@@ -97,7 +97,7 @@ export default function ParametricsPage() {
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm font-medium"
+                    className="flex items-center gap-2 bg-eco-700 text-white px-6 py-2.5 rounded-xl hover:bg-eco-800 transition shadow-sm font-medium"
                 >
                     <Plus size={20} />
                     Agregar Nuevo
@@ -114,7 +114,7 @@ export default function ParametricsPage() {
                             <button
                                 key={tab.key}
                                 onClick={() => setSelectedTab(tab.key)}
-                                className={`w-full text-left px-4 py-3 rounded-xl transition text-sm font-medium ${selectedTab === tab.key ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`w-full text-left px-4 py-3 rounded-xl transition text-sm font-medium ${selectedTab === tab.key ? 'bg-eco-50 text-eco-800' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 {tab.label}
                             </button>
@@ -150,7 +150,7 @@ export default function ParametricsPage() {
                                             <td className="px-6 py-4 font-medium">{item.description || item.name || '-'}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar">
+                                                    <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-eco-700 hover:bg-eco-50 rounded-lg transition" title="Editar">
                                                         <Edit size={18} />
                                                     </button>
                                                     <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Eliminar">
@@ -185,7 +185,7 @@ export default function ParametricsPage() {
                                     required
                                     autoFocus
                                     placeholder="Ej: Casado/a"
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-gray-900"
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 transition text-gray-900"
                                     value={modalInputValue}
                                     onChange={(e) => setModalInputValue(e.target.value)}
                                 />
@@ -193,7 +193,7 @@ export default function ParametricsPage() {
                             </div>
                             <div className="flex gap-3 justify-end">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancelar</button>
-                                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-2">
+                                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-eco-700 hover:bg-eco-800 rounded-lg transition flex items-center gap-2">
                                     <Save size={16} />
                                     Guardar
                                 </button>

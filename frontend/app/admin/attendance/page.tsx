@@ -106,13 +106,13 @@ export default function AttendancePage() {
                     <div className="flex bg-gray-100 p-1 rounded-lg">
                         <button
                             onClick={() => setActiveTab('daily')}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === 'daily' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === 'daily' ? 'bg-white text-eco-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             Parte Diario
                         </button>
                         <button
                             onClick={() => setActiveTab('logs')}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === 'logs' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition ${activeTab === 'logs' ? 'bg-white text-eco-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             Log Fichadas
                         </button>
@@ -130,9 +130,9 @@ export default function AttendancePage() {
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="border border-gray-300 rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
                     />
-                    <button onClick={fetchDaily} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <button onClick={fetchDaily} className="p-2 text-eco-700 hover:bg-eco-50 rounded-lg">
                         <RotateCcw size={18} />
                     </button>
                 </div>
@@ -170,7 +170,7 @@ export default function AttendancePage() {
                                         <td className="p-4">
                                             {ev.employee ? (
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                                    <div className="w-8 h-8 rounded-full bg-eco-100 flex items-center justify-center text-eco-700 font-bold text-xs">
                                                         {ev.employee.firstName[0]}{ev.employee.lastName[0]}
                                                     </div>
                                                     <div>
@@ -217,7 +217,7 @@ export default function AttendancePage() {
                                     <tr key={row.id} className="hover:bg-gray-50 transition">
                                         <td className="p-4 pl-6">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${row.status === 'ABSENT' ? 'bg-red-100 text-red-600' : row.status === 'LICENSE' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${row.status === 'ABSENT' ? 'bg-red-100 text-red-600' : row.status === 'LICENSE' ? 'bg-eco-100 text-eco-700' : 'bg-green-100 text-green-600'}`}>
                                                     {row.employee.firstName[0]}{row.employee.lastName[0]}
                                                 </div>
                                                 <div>
@@ -247,7 +247,7 @@ export default function AttendancePage() {
                                         </td>
                                         <td className="p-4">
                                             {row.status === 'LICENSE' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-eco-100 text-eco-900">
                                                     {row.meta?.leaveTypeName || 'Licencia'}
                                                 </span>
                                             ) : row.status === 'OFF' ? (

@@ -55,7 +55,7 @@ export default function SearchableEmployeeSelect({ employees, value, onChange, p
     return (
         <div className="relative w-full" ref={containerRef}>
             <div
-                className={`w-full flex items-center border border-gray-300 rounded-lg p-2 bg-white cursor-text focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500`}
+                className={`w-full flex items-center border border-gray-300 rounded-lg p-2 bg-white cursor-text focus-within:ring-2 focus-within:ring-eco-600/20 focus-within:border-eco-600`}
                 onClick={() => setIsOpen(true)}
             >
                 <Search size={16} className="text-gray-400 mr-2" />
@@ -89,7 +89,7 @@ export default function SearchableEmployeeSelect({ employees, value, onChange, p
                             {filteredEmployees.map(emp => (
                                 <li
                                     key={emp.id}
-                                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 transition-colors ${value === emp.id ? 'bg-blue-100 text-blue-900 font-medium' : 'text-gray-900'}`}
+                                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-eco-50 transition-colors ${value === emp.id ? 'bg-eco-100 text-blue-900 font-medium' : 'text-gray-900'}`}
                                     onClick={() => {
                                         onChange(emp.id);
                                         setIsOpen(false);

@@ -19,7 +19,7 @@ interface SystemUser {
 
 const ROLES = [
     { value: 'admin', label: 'Administrador', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-    { value: 'administrative', label: 'Administrativo', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+    { value: 'administrative', label: 'Administrativo', color: 'bg-eco-100 text-eco-900 border-blue-200' },
     { value: 'employee', label: 'Empleado', color: 'bg-green-100 text-green-800 border-green-200' },
 ];
 
@@ -147,7 +147,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                     onClick={handleOpenCreateModal}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm"
+                    className="bg-eco-700 hover:bg-eco-800 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm"
                 >
                     <UserPlus size={18} /> Nuevo Usuario
                 </button>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                                             <div className="inline-flex gap-1">
                                                 <button
                                                     onClick={() => handleOpenEditModal(user)}
-                                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                                                    className="p-1.5 text-gray-400 hover:text-eco-700 hover:bg-eco-50 rounded transition"
                                                     title="Editar rol / contraseña"
                                                 >
                                                     <Pencil size={16} />
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
-                                            className="flex-1 border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                                            className="flex-1 border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
                                             placeholder="Ej: 35004215"
                                             value={dniSearch}
                                             onChange={e => { setDniSearch(e.target.value); setFoundEmployee(null); setDniError(''); }}
@@ -261,9 +261,9 @@ export default function SettingsPage() {
 
                             {/* Edit: show who we're editing */}
                             {editingUser && (
-                                <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-900">
+                                <div className="p-3 bg-eco-50 border border-eco-100 rounded-lg text-sm text-blue-900">
                                     <strong>Editando:</strong> {editingUser.employee ? `${editingUser.employee.lastName}, ${editingUser.employee.firstName}` : editingUser.username}
-                                    <div className="text-xs text-blue-600 mt-0.5">Usuario: {editingUser.username}</div>
+                                    <div className="text-xs text-eco-700 mt-0.5">Usuario: {editingUser.username}</div>
                                 </div>
                             )}
 
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                                             key={r.value}
                                             type="button"
                                             onClick={() => setFormData({ ...formData, role: r.value })}
-                                            className={`py-2 px-3 rounded-lg text-sm font-medium transition border-2 ${formData.role === r.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                                            className={`py-2 px-3 rounded-lg text-sm font-medium transition border-2 ${formData.role === r.value ? 'border-eco-700 bg-eco-50 text-eco-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
                                         >
                                             {r.label}
                                         </button>
@@ -290,7 +290,7 @@ export default function SettingsPage() {
                                 <input
                                     type="password"
                                     required={!editingUser}
-                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
                                     placeholder={editingUser ? '(Sin cambios)' : 'Mínimo 4 caracteres'}
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                                 <button
                                     type="submit"
                                     disabled={!editingUser && !foundEmployee}
-                                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-4 py-2.5 bg-eco-700 text-white rounded-lg font-medium hover:bg-eco-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
                                 </button>

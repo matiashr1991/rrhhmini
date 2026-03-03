@@ -76,7 +76,7 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div className="p-8 h-full flex flex-col items-center justify-center space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-eco-700"></div>
                 <p className="text-gray-500 font-medium animate-pulse">Cargando métricas del panel...</p>
             </div>
         );
@@ -91,7 +91,7 @@ export default function Dashboard() {
                     <p className="text-gray-500 mt-1">Resumen general de recursos humanos y asistencia.</p>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500 bg-white px-4 py-2 border border-gray-200 rounded-lg shadow-sm">
-                    <Activity size={16} className="text-blue-600" />
+                    <Activity size={16} className="text-eco-700" />
                     <span>Actualizado: {new Date().toLocaleTimeString()}</span>
                 </div>
             </div>
@@ -102,7 +102,7 @@ export default function Dashboard() {
                     {/* Total Empleados */}
                     <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-110 transition-transform">
+                            <div className="p-3 bg-eco-50 text-eco-700 rounded-xl group-hover:scale-110 transition-transform">
                                 <Users size={24} />
                             </div>
                         </div>
@@ -141,7 +141,7 @@ export default function Dashboard() {
                     {/* Licencias */}
                     <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-sky-50 text-sky-600 rounded-xl group-hover:scale-110 transition-transform">
+                            <div className="p-3 bg-lapacho-50 text-lapacho-500 rounded-xl group-hover:scale-110 transition-transform">
                                 <Briefcase size={24} />
                             </div>
                         </div>
@@ -172,7 +172,7 @@ export default function Dashboard() {
             {stats && (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <Activity className="text-blue-600" size={20} />
+                        <Activity className="text-eco-700" size={20} />
                         Tendencia de Asistencia (Últimos 7 días)
                     </h2>
                     <div className="h-[350px] w-full">
@@ -196,10 +196,10 @@ export default function Dashboard() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <Users className="text-blue-600" size={20} />
+                        <Users className="text-eco-700" size={20} />
                         Vista Rápida de Personal
                     </h2>
-                    <Link href="/admin/employees" className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 group">
+                    <Link href="/admin/employees" className="text-sm text-eco-700 hover:text-eco-900 font-medium flex items-center gap-1 group">
                         Ver todos <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
@@ -214,7 +214,7 @@ export default function Dashboard() {
                         </thead>
                         <tbody className="text-sm divide-y divide-gray-100">
                             {employees.slice(0, 5).map((emp) => ( // Show only top 5 for quick view
-                                <tr key={emp.id} className="hover:bg-blue-50/50 transition">
+                                <tr key={emp.id} className="hover:bg-eco-50/50 transition">
                                     <td className="p-4 pl-6 font-medium text-gray-900">{emp.employeeKey}</td>
                                     <td className="p-4 text-gray-700 font-medium">{emp.lastName}, {emp.firstName}</td>
                                     <td className="p-4 text-gray-500">{emp.dni || '-'}</td>

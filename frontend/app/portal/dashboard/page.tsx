@@ -73,7 +73,7 @@ export default function PortalDashboard() {
 
     return (
         <div className="space-y-8">
-            <div className="bg-blue-600 rounded-3xl p-8 text-white shadow-xl shadow-blue-600/20">
+            <div className="bg-eco-700 rounded-3xl p-8 text-white shadow-xl shadow-eco-700/20">
                 <h1 className="text-3xl font-bold mb-2">Hola!</h1>
                 <p className="opacity-90">Bienvenido a tu portal de autogestión.</p>
             </div>

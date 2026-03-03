@@ -104,7 +104,7 @@ export default function LeaveTypesTab() {
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
+                    className="bg-eco-700 hover:bg-eco-800 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
                 >
                     <Plus size={18} /> Nuevo Tipo
                 </button>
@@ -141,7 +141,7 @@ export default function LeaveTypesTab() {
                                     </td>
                                     <td className="p-4 text-center">
                                         {type.maxDaysPerYear !== null && type.maxDaysPerYear !== undefined ? (
-                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-eco-50 text-eco-800 border border-eco-100">
                                                 <Calendar size={11} /> {type.maxDaysPerYear}d
                                             </span>
                                         ) : (
@@ -161,7 +161,7 @@ export default function LeaveTypesTab() {
                                         <div className="flex justify-end gap-2">
                                             <button
                                                 onClick={() => handleOpenModal(type)}
-                                                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                                                className="p-1.5 text-gray-500 hover:text-eco-700 hover:bg-eco-50 rounded transition"
                                                 title="Editar"
                                             >
                                                 <Pencil size={18} />
@@ -207,7 +207,7 @@ export default function LeaveTypesTab() {
                                 <input
                                     type="text"
                                     required
-                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Ej: Licencia por Matrimonio"
@@ -216,22 +216,22 @@ export default function LeaveTypesTab() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                                 <textarea
-                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none min-h-[72px]"
+                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none min-h-[72px]"
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
 
                             {/* Quota limits */}
-                            <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                                <div className="text-sm font-semibold text-blue-800">Límites de cuota (independientes por tipo)</div>
+                            <div className="p-4 bg-eco-50 rounded-xl border border-eco-100 space-y-3">
+                                <div className="text-sm font-semibold text-eco-900">Límites de cuota (independientes por tipo)</div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-medium text-gray-600 mb-1">Días máximos por año</label>
                                         <input
                                             type="number"
                                             min={1}
-                                            className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                            className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none text-sm"
                                             placeholder="Vacío = ilimitado"
                                             value={formData.maxDaysPerYear ?? ''}
                                             onChange={e => setFormData({ ...formData, maxDaysPerYear: e.target.value === '' ? null : parseInt(e.target.value) })}
@@ -242,20 +242,20 @@ export default function LeaveTypesTab() {
                                         <input
                                             type="number"
                                             min={1}
-                                            className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                            className="w-full border border-gray-300 rounded-lg p-2 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none text-sm"
                                             placeholder="Vacío = sin límite"
                                             value={formData.maxDaysPerMonth ?? ''}
                                             onChange={e => setFormData({ ...formData, maxDaysPerMonth: e.target.value === '' ? null : parseInt(e.target.value) })}
                                         />
                                     </div>
                                 </div>
-                                <p className="text-xs text-blue-600">Dejar vacío = sin límite. Cada tipo tiene su propio contador, no comparten cuota entre sí.</p>
+                                <p className="text-xs text-eco-700">Dejar vacío = sin límite. Cada tipo tiene su propio contador, no comparten cuota entre sí.</p>
                             </div>
 
                             <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                                 <input
                                     type="checkbox"
-                                    className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                    className="w-5 h-5 text-eco-700 rounded border-gray-300 focus:ring-eco-600"
                                     checked={formData.requiresApproval}
                                     onChange={e => setFormData({ ...formData, requiresApproval: e.target.checked })}
                                 />
@@ -269,7 +269,7 @@ export default function LeaveTypesTab() {
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                                     Cancelar
                                 </button>
-                                <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+                                <button type="submit" className="flex-1 px-4 py-2.5 bg-eco-700 text-white rounded-lg font-medium hover:bg-eco-800 transition">
                                     Guardar
                                 </button>
                             </div>

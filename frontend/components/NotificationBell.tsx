@@ -79,7 +79,7 @@ export default function NotificationBell({ target }: { target: 'admin' | 'employ
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-gray-500 hover:text-blue-600 transition focus:outline-none"
+                className="relative p-2 text-gray-500 hover:text-eco-700 transition focus:outline-none"
             >
                 <Bell size={24} />
                 {notifications.length > 0 && (
@@ -95,7 +95,7 @@ export default function NotificationBell({ target }: { target: 'admin' | 'employ
                         <h3 className="font-semibold px-1 text-gray-800 flex items-center gap-2">
                             Notificaciones
                             {notifications.length > 0 && (
-                                <span className="bg-blue-100 text-blue-700 text-xs py-0.5 px-2 rounded-full font-bold">
+                                <span className="bg-eco-100 text-eco-800 text-xs py-0.5 px-2 rounded-full font-bold">
                                     {notifications.length} nuevas
                                 </span>
                             )}
@@ -103,7 +103,7 @@ export default function NotificationBell({ target }: { target: 'admin' | 'employ
                         {notifications.length > 0 && (
                             <button
                                 onClick={handleMarkAllAsRead}
-                                className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded transition hover:bg-blue-50"
+                                className="text-xs text-eco-700 hover:text-eco-900 font-medium px-2 py-1 rounded transition hover:bg-eco-50"
                             >
                                 Marcar todo leído
                             </button>
@@ -121,7 +121,7 @@ export default function NotificationBell({ target }: { target: 'admin' | 'employ
                                 {notifications.map(notification => (
                                     <div
                                         key={notification.id}
-                                        className="p-4 hover:bg-blue-50/30 transition group flex flex-col gap-1 cursor-default relative"
+                                        className="p-4 hover:bg-eco-50/30 transition group flex flex-col gap-1 cursor-default relative"
                                     >
                                         <div className="flex justify-between items-start gap-4">
                                             <span className="font-semibold text-sm text-gray-800 leading-tight pr-6">
@@ -137,7 +137,7 @@ export default function NotificationBell({ target }: { target: 'admin' | 'employ
 
                                         <button
                                             onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                            className="absolute top-4 right-4 p-1 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
+                                            className="absolute top-4 right-4 p-1 text-gray-300 hover:text-eco-700 hover:bg-eco-50 rounded opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
                                             title="Marcar como leída"
                                         >
                                             <Check size={16} strokeWidth={3} />

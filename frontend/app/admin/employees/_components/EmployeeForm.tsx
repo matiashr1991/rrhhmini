@@ -174,7 +174,7 @@ export default function EmployeeForm({ initialData, isEdit, onSubmit, title }: E
             <label className="text-sm font-medium text-gray-700">{label}</label>
             <select
                 name={name}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-gray-900 bg-white"
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 transition text-gray-900 bg-white"
                 value={(formData as any)[name] || ''}
                 onChange={handleChange}
             >
@@ -206,7 +206,7 @@ export default function EmployeeForm({ initialData, isEdit, onSubmit, title }: E
                 placeholder=" "
                 className={`
                     w-full px-4 py-2 rounded-lg border border-gray-200 transition text-gray-900 peer
-                    focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                    focus:ring-2 focus:ring-eco-600/20 focus:border-eco-600 
                     [&:not(:placeholder-shown):invalid]:border-red-500 [&:not(:placeholder-shown):invalid]:ring-1 [&:not(:placeholder-shown):invalid]:ring-red-500
                 `}
                 value={(formData as any)[name] ?? ''}
@@ -271,7 +271,7 @@ export default function EmployeeForm({ initialData, isEdit, onSubmit, title }: E
                         {renderSelect('plantType2Id', 'Planta 2', parametrics.plantType2s)}
                         {renderInput('workplaceLocation', 'Lugar de prestación (Texto)', 'text')}
                         <div className="flex items-center gap-2 pt-8">
-                            <input type="checkbox" name="isActive" id="isActive" checked={formData.isActive} onChange={handleChange} className="w-5 h-5 text-blue-600 rounded" />
+                            <input type="checkbox" name="isActive" id="isActive" checked={formData.isActive} onChange={handleChange} className="w-5 h-5 text-eco-700 rounded" />
                             <label htmlFor="isActive" className="font-medium">Empleado Activo</label>
                         </div>
                     </div>
@@ -313,7 +313,7 @@ export default function EmployeeForm({ initialData, isEdit, onSubmit, title }: E
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 font-medium disabled:opacity-50"
+                        className="flex items-center gap-2 bg-eco-700 text-white px-8 py-3 rounded-xl hover:bg-eco-800 transition shadow-lg shadow-eco-700/20 font-medium disabled:opacity-50"
                     >
                         <Save size={20} />
                         {loading ? 'Guardando...' : 'Guardar Empleado'}
