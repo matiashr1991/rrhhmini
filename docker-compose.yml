@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: rrhh_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-rrhh_moderno}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - rrhh_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend_api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rrhh_backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      # Forzamos los valores en caso de que el .env local diga 'localhost'
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    networks:
+      - rrhh_network
+
+  frontend_web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Usa el puerto que va a tener expuesto el backend en el host para el lado cliente
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: rrhh_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend_api
+    networks:
+      - rrhh_network
+
+volumes:
+  db_data:
+    name: rrhh_db_data
+
+networks:
+  rrhh_network:
+    name: rrhh_network
+    driver: bridge
