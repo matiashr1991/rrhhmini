@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -11,6 +12,8 @@ import { ReportsModule } from './reports/reports.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HikvisionModule } from './hikvision/hikvision.module';
+import { AuditModule } from './audit/audit.module';
+import { AuditInterceptor } from './audit/audit.interceptor';
 
 @Module({
   imports: [
@@ -40,8 +43,15 @@ import { HikvisionModule } from './hikvision/hikvision.module';
     ScheduleModule.forRoot(),
     NotificationsModule,
     HikvisionModule,
+    AuditModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
+  ],
 })
 export class AppModule { }

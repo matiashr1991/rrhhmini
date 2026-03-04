@@ -5,15 +5,33 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { Role } from './role.enum';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/audit-log.entity';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private auditService: AuditService,
+    ) { }
 
     @UseGuards(AuthGuard('local'))
     @Post('login')
     async login(@Request() req) {
-        return this.authService.login(req.user);
+        const result = await this.authService.login(req.user);
+
+        // Audit: registrar login exitoso
+        this.auditService.log({
+            userId: req.user.id,
+            username: req.user.username,
+            action: AuditAction.LOGIN,
+            entity: 'Auth',
+            details: { role: req.user.role },
+            ipAddress: req.ip || req.headers?.['x-forwarded-for'] || 'unknown',
+            userAgent: req.headers?.['user-agent'] || 'unknown',
+        });
+
+        return result;
     }
 
     @Post('register')

@@ -9,7 +9,8 @@ import {
     Menu,
     LogOut,
     Coffee,
-    Database
+    Database,
+    Shield
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -25,6 +26,7 @@ const sidebarItems = [
     { icon: Coffee, label: 'Licencias', href: '/admin/leaves' },
     { icon: FileText, label: 'Reportes', href: '/admin/reports' },
     { icon: Settings, label: 'Configuración', href: '/admin/settings' },
+    { icon: Shield, label: 'Auditoría', href: '/admin/audit' },
 ];
 
 export default function AdminLayout({
