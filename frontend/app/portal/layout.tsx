@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogOut, User, Menu, X, Clock } from 'lucide-react';
@@ -14,11 +14,30 @@ export default function PortalLayout({
 }) {
     const router = useRouter();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
+
+    // Guard: si no hay token → redirigir al login
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/login');
+        } else {
+            setAuthChecked(true);
+        }
+    }, [router]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         router.push('/login');
     };
+
+    if (!authChecked) {
+        return (
+            <div className="min-h-screen bg-eco-50 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-eco-200 border-t-eco-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-eco-50 flex">
