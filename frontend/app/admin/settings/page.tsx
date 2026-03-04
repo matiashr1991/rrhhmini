@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Search, UserPlus, Trash2, Pencil, X, ShieldCheck, User, Users } from 'lucide-react';
+import { Search, UserPlus, Trash2, Pencil, X, ShieldCheck, User, Users, UserCog } from 'lucide-react';
 
 interface SystemUser {
     id: string;
@@ -18,17 +18,21 @@ interface SystemUser {
 }
 
 const ROLES = [
-    { value: 'admin', label: 'Administrador', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-    { value: 'administrative', label: 'Administrativo', color: 'bg-eco-100 text-eco-900 border-blue-200' },
-    { value: 'employee', label: 'Empleado', color: 'bg-green-100 text-green-800 border-green-200' },
+    { value: 'ADMIN', label: 'Administrador', color: 'bg-purple-100 text-purple-800 border-purple-200', icon: ShieldCheck, description: 'Acceso total al sistema' },
+    { value: 'ADMINISTRATIVE', label: 'Administrativo', color: 'bg-eco-100 text-eco-900 border-eco-200', icon: UserCog, description: 'Gestión de RRHH' },
+    { value: 'EMPLOYEE', label: 'Empleado', color: 'bg-green-100 text-green-800 border-green-200', icon: User, description: 'Portal del empleado' },
 ];
 
+// Roles that don't require an employee link
+const STANDALONE_ROLES = ['ADMIN', 'ADMINISTRATIVE'];
+
 function getRoleBadge(role: string) {
-    const r = ROLES.find(r => r.value === role);
+    const r = ROLES.find(r => r.value === role.toUpperCase());
     if (!r) return <span className="text-xs text-gray-500">{role}</span>;
+    const Icon = r.icon;
     return (
         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${r.color}`}>
-            {r.value === 'admin' ? <ShieldCheck size={12} /> : <User size={12} />}
+            <Icon size={12} />
             {r.label}
         </span>
     );
@@ -48,8 +52,9 @@ export default function SettingsPage() {
 
     // Form state
     const [formData, setFormData] = useState({
+        username: '',
         password: '',
-        role: 'employee',
+        role: 'EMPLOYEE',
     });
 
     const fetchUsers = async () => {
@@ -65,6 +70,8 @@ export default function SettingsPage() {
     };
 
     useEffect(() => { fetchUsers(); }, []);
+
+    const isStandaloneRole = STANDALONE_ROLES.includes(formData.role);
 
     const handleDniLookup = async () => {
         if (!dniSearch.trim()) return;
@@ -90,7 +97,7 @@ export default function SettingsPage() {
         setFoundEmployee(null);
         setDniSearch('');
         setDniError('');
-        setFormData({ password: '', role: 'employee' });
+        setFormData({ username: '', password: '', role: 'EMPLOYEE' });
         setIsModalOpen(true);
     };
 
@@ -99,7 +106,7 @@ export default function SettingsPage() {
         setFoundEmployee(user.employee || null);
         setDniSearch('');
         setDniError('');
-        setFormData({ password: '', role: user.role });
+        setFormData({ username: '', password: '', role: user.role.toUpperCase() });
         setIsModalOpen(true);
     };
 
@@ -107,11 +114,20 @@ export default function SettingsPage() {
         e.preventDefault();
         try {
             if (editingUser) {
+                // Edit existing user
                 await api.put(`/auth/users/${editingUser.id}`, {
                     role: formData.role,
                     ...(formData.password ? { password: formData.password } : {}),
                 });
+            } else if (isStandaloneRole) {
+                // Create standalone admin/administrative user (no employee link)
+                await api.post('/auth/register', {
+                    username: formData.username,
+                    password: formData.password,
+                    role: formData.role,
+                });
             } else {
+                // Create employee user (linked to employee via DNI)
                 if (!foundEmployee) return;
                 await api.post('/auth/users', {
                     username: foundEmployee.dni,
@@ -135,6 +151,18 @@ export default function SettingsPage() {
             fetchUsers();
         } catch {
             alert('Error al eliminar');
+        }
+    };
+
+    const handleRoleChange = (role: string) => {
+        setFormData({ ...formData, role });
+        // Clear DNI/employee state when switching to standalone
+        if (STANDALONE_ROLES.includes(role)) {
+            setFoundEmployee(null);
+            setDniSearch('');
+            setDniError('');
+        } else {
+            setFormData(prev => ({ ...prev, role, username: '' }));
         }
     };
 
@@ -167,7 +195,7 @@ export default function SettingsPage() {
                             <thead className="bg-gray-50/50">
                                 <tr>
                                     <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Empleado</th>
-                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario (DNI)</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
                                     <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
                                     <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Creado</th>
                                     <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Acciones</th>
@@ -177,7 +205,7 @@ export default function SettingsPage() {
                                 {users.map(user => (
                                     <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="p-4 text-sm font-medium text-gray-900">
-                                            {user.employee ? `${user.employee.lastName}, ${user.employee.firstName}` : <span className="text-gray-400 italic">Sin empleado vinculado</span>}
+                                            {user.employee ? `${user.employee.lastName}, ${user.employee.firstName}` : <span className="text-gray-400 italic">Usuario del sistema</span>}
                                         </td>
                                         <td className="p-4 text-sm text-gray-600 font-mono">{user.username}</td>
                                         <td className="p-4">{getRoleBadge(user.role)}</td>
@@ -227,8 +255,32 @@ export default function SettingsPage() {
                         </div>
 
                         <form onSubmit={handleSave} className="p-6 space-y-5">
-                            {/* DNI Lookup (Create only) */}
-                            {!editingUser && (
+                            {/* Role selector (first, so it controls what fields show below) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Usuario</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {ROLES.map(r => {
+                                        const Icon = r.icon;
+                                        return (
+                                            <button
+                                                key={r.value}
+                                                type="button"
+                                                onClick={() => handleRoleChange(r.value)}
+                                                className={`py-2.5 px-3 rounded-lg text-sm font-medium transition border-2 flex flex-col items-center gap-1 ${formData.role === r.value ? 'border-eco-700 bg-eco-50 text-eco-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                                            >
+                                                <Icon size={18} />
+                                                {r.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    {ROLES.find(r => r.value === formData.role)?.description}
+                                </p>
+                            </div>
+
+                            {/* Employee: DNI Lookup (Create only) */}
+                            {!editingUser && !isStandaloneRole && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Buscar Empleado por DNI</label>
                                     <div className="flex gap-2">
@@ -259,29 +311,32 @@ export default function SettingsPage() {
                                 </div>
                             )}
 
+                            {/* Admin/Administrative: free username (Create only) */}
+                            {!editingUser && isStandaloneRole && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de Usuario</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
+                                        placeholder="Ej: jlopez, admin2"
+                                        value={formData.username}
+                                        onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                        minLength={3}
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Este usuario no necesita estar vinculado a un legajo de empleado.
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Edit: show who we're editing */}
                             {editingUser && (
-                                <div className="p-3 bg-eco-50 border border-eco-100 rounded-lg text-sm text-blue-900">
+                                <div className="p-3 bg-eco-50 border border-eco-100 rounded-lg text-sm text-gray-800">
                                     <strong>Editando:</strong> {editingUser.employee ? `${editingUser.employee.lastName}, ${editingUser.employee.firstName}` : editingUser.username}
                                     <div className="text-xs text-eco-700 mt-0.5">Usuario: {editingUser.username}</div>
                                 </div>
                             )}
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {ROLES.map(r => (
-                                        <button
-                                            key={r.value}
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, role: r.value })}
-                                            className={`py-2 px-3 rounded-lg text-sm font-medium transition border-2 ${formData.role === r.value ? 'border-eco-700 bg-eco-50 text-eco-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
-                                        >
-                                            {r.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,7 +359,7 @@ export default function SettingsPage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={!editingUser && !foundEmployee}
+                                    disabled={!editingUser && !isStandaloneRole && !foundEmployee}
                                     className="flex-1 px-4 py-2.5 bg-eco-700 text-white rounded-lg font-medium hover:bg-eco-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
