@@ -1,82 +1,90 @@
-# Guía de Despliegue con Docker
+# Guía de Despliegue — Docker Swarm + Traefik
 
-Este documento explica cómo levantar el Sistema de RRHH completo (Base de Datos, Backend y Frontend) en cualquier servidor o computadora utilizando **Docker**.
+Este documento explica cómo desplegar el Sistema RRHH en un VPS con **Docker Swarm**, **Traefik** como reverse proxy, y **MySQL corriendo en el host**.
 
-## Requisitos Previos
+## Arquitectura
 
-1. Tener instalado [Docker](https://docs.docker.com/get-docker/).
-2. Tener instalado Docker Compose (usualmente viene incluido con Docker Desktop).
-
-## Archivos Necesarios
-
-Antes de levantar el proyecto, asegurate de tener tu archivo `.env` configurado dentro de la carpeta `backend/`. Este archivo debe contener las credenciales de la base de datos y la API de Hikvision. **Nunca subas este archivo a GitHub.**
-
-Copiá el archivo de ejemplo y completá con tus valores:
-```bash
-cp backend/.env.example backend/.env
-# Luego editá backend/.env con tus credenciales reales
 ```
-> **Nota:** El `DB_HOST` debe ser `mysql_db` (el nombre del contenedor en el `docker-compose.yml`) o `localhost` (para desarrollo local sin Docker). El `docker-compose.yml` fuerza el host a `mysql_db` automáticamente de todos modos.
-
-## Levantar el Sistema (Primer despliegue o actualización)
-
-1. Abre una terminal y colocate en la raíz del proyecto (donde se encuentra el archivo `docker-compose.yml`).
-2. Ejecuta el siguiente comando para construir las imágenes y levantar los contenedores en segundo plano:
-
-```bash
-docker compose up -d --build
+Internet → Traefik (HTTPS) → rrhh.mmatdev.com
+                                ├── /api/*  → backend_api:8000  (NestJS)
+                                └── /*      → frontend_web:3000 (Next.js)
+                                
+                backend_api → host.docker.internal:3306 (MySQL del host)
 ```
 
-- `-d`: Ejecuta los contenedores en modo "detached" (segundo plano) para que puedas cerrar la terminal.
-- `--build`: Fuerza la reconstrucción de las imágenes del backend y frontend. Esto es útil si hiciste cambios en el código.
+## Requisitos
 
-## Apagar el Sistema
+1. **Docker** con Swarm mode habilitado (`docker swarm init`)
+2. **Traefik** corriendo como servicio Swarm con red externa `web`
+3. **MySQL 8.0** corriendo en el host (no en Docker)
+4. Dominio `rrhh.mmatdev.com` apuntando al VPS
 
-Para detener los contenedores sin borrar la información:
+## Paso 1: Preparar variables de entorno
 
-```bash
-docker compose stop
-```
-
-Para detener e iniciar los contenedores (reiniciar):
+Crear el archivo `.env` junto al `docker-compose.yml`:
 
 ```bash
-docker compose restart
+cp .env.example .env
+nano .env   # Completar con las credenciales reales
 ```
 
-## Borrar los Contenedores (La info persistirá)
+Variables obligatorias:
+- `DB_PASSWORD` — contraseña del MySQL del host
+- `JWT_SECRET` — secreto largo (>32 chars) para tokens JWT
+- `MAIL_PASS` — app password de Gmail
+- `HIK_API_KEY` — API Key de Hikvision
 
-Para detener y borrar los contenedores y la red creada:
+## Paso 2: Crear la base de datos en MySQL
+
+Si todavía no existe la base de datos:
 
 ```bash
-docker compose down
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS rrhh_moderno CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
-> **¡Importante!** Al ejecutar `down`, la información de la base de datos **NO se borrará** porque está guardada en un volumen persistente (`db_data`). Cuando vuelvas a hacer `docker compose up`, todo estará ahí.
 
-## Borrar TODO (Peligro: Pérdida total de datos)
-
-Si quieres destruir el entorno por completo y **borrar toda la base de datos y sus registros**, ejecuta:
+## Paso 3: Build de las imágenes
 
 ```bash
-docker compose down -v
+docker compose build
 ```
-El parámetro `-v` elimina los volúmenes, desapareciendo toda tu base de datos permanentemente. Úsalo con mucha cautela.
 
-## Monitorear los Logs
+Esto construye `rrhh-backend:latest` y `rrhh-frontend:latest` usando los Dockerfiles multi-stage.
 
-Si algo no funciona o quieres ver qué está haciendo el sistema:
+## Paso 4: Deploy del stack
 
-Ver logs de todos los contenedores:
 ```bash
-docker compose logs -f
+docker stack deploy -c docker-compose.yml rrhhmini
 ```
 
-Ver logs de un contenedor en específico (ej: backend):
+Verificar que los servicios estén corriendo:
 ```bash
-docker compose logs -f backend_api
+docker service ls | grep rrhhmini
+docker service logs rrhhmini_backend_api -f
+docker service logs rrhhmini_frontend_web -f
 ```
 
-## Accesos
-- **Frontend App:** http://localhost:3000
-- **Backend API:** http://localhost:8000
-- **Base de Datos:** Puerto expuesto en local al `3306` (Puedes conectar DBeaver o TablePlus a `localhost:3306` con la clave de root).
+## Paso 5: Verificar
+
+- **Frontend:** https://rrhh.mmatdev.com/login
+- **Backend API:** https://rrhh.mmatdev.com/api/health (si existe el endpoint)
+- **Logs:** `docker service logs rrhhmini_backend_api -f`
+
+## Actualizar el sistema
+
+Para desplegar una nueva versión:
+
+```bash
+cd /opt/stacks/rrhhmini
+git pull
+docker compose build
+docker stack deploy -c docker-compose.yml rrhhmini
+```
+
+> Los servicios se actualizan con rolling update automático.
+
+## Notas importantes
+
+- **`DB_SYNC=false`** en producción: TypeORM no modificará el esquema automáticamente. Para migraciones de esquema, usar TypeORM CLI o scripts SQL manuales.
+- **`host.docker.internal`** es la forma estándar de acceder al host desde un contenedor Docker. Funciona en Linux con `extra_hosts: ["host.docker.internal:host-gateway"]`.
+- **Red `web`**: debe existir antes del deploy (`docker network create --driver overlay web`).
+- **Traefik strip-prefix**: el middleware `rrhh-strip-api` quita `/api` antes de reenviar al backend, así NestJS recibe las rutas limpias (ej: `/employees` en vez de `/api/employees`).

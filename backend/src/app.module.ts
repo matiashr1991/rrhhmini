@@ -28,7 +28,7 @@ import { HikvisionModule } from './hikvision/hikvision.module';
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
-        synchronize: true, // Auto-create tables (dev only)
+        synchronize: configService.get<string>('DB_SYNC', 'true') === 'true',
       }),
       inject: [ConfigService],
     }),

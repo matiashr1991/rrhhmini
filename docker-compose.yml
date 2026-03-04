@@ -1,66 +1,76 @@
 version: '3.8'
 
 services:
-  mysql_db:
-    image: mysql:8.0
-    container_name: rrhh_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_DATABASE:-rrhh_moderno}
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - rrhh_network
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend_api:
+    image: rrhh-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: rrhh_backend
-    restart: always
-    env_file:
-      - ./backend/.env
     environment:
-      - DB_HOST=mysql_db
-      - DB_PORT=3306
-      # Forzamos los valores en caso de que el .env local diga 'localhost'
-    ports:
-      - "8000:8000"
-    depends_on:
-      mysql_db:
-        condition: service_healthy
+      - NODE_ENV=production
+      - DB_HOST=host.docker.internal
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE:-rrhh_moderno}
+      - DB_SYNC=false
+      - JWT_SECRET=${JWT_SECRET}
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASS=${MAIL_PASS}
+      - MAIL_FROM=${MAIL_FROM}
+      - HIK_API_BASE=${HIK_API_BASE}
+      - HIK_API_KEY=${HIK_API_KEY}
+      - HIK_POLL_INTERVAL_MS=${HIK_POLL_INTERVAL_MS:-30000}
+      - HIK_POLL_LIMIT=${HIK_POLL_LIMIT:-200}
+    # Permite al contenedor acceder al MySQL del host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
-      - rrhh_network
+      - web
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rrhh-api.rule=Host(`rrhh.mmatdev.com`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.rrhh-api.entrypoints=websecure"
+        - "traefik.http.routers.rrhh-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.rrhh-api.loadbalancer.server.port=8000"
+        # Strip /api prefix before forwarding to backend
+        - "traefik.http.middlewares.rrhh-strip-api.stripprefix.prefixes=/api"
+        - "traefik.http.routers.rrhh-api.middlewares=rrhh-strip-api"
 
   frontend_web:
+    image: rrhh-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Usa el puerto que va a tener expuesto el backend en el host para el lado cliente
-        NEXT_PUBLIC_API_URL: http://localhost:8000
-    container_name: rrhh_frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend_api
+        # Vacío → usa /api por defecto (Traefik rutea al backend)
+        NEXT_PUBLIC_API_URL: ""
     networks:
-      - rrhh_network
-
-volumes:
-  db_data:
-    name: rrhh_db_data
+      - web
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rrhh-frontend.rule=Host(`rrhh.mmatdev.com`)"
+        - "traefik.http.routers.rrhh-frontend.entrypoints=websecure"
+        - "traefik.http.routers.rrhh-frontend.tls.certresolver=letsencrypt"
+        - "traefik.http.services.rrhh-frontend.loadbalancer.server.port=3000"
+        # Prioridad más baja que /api para que no capture las rutas del backend
+        - "traefik.http.routers.rrhh-frontend.priority=1"
 
 networks:
-  rrhh_network:
-    name: rrhh_network
-    driver: bridge
+  web:
+    external: true
+  internal:
+    driver: overlay
