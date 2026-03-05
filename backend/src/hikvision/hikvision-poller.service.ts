@@ -155,12 +155,10 @@ export class HikvisionPollerService implements OnModuleInit {
             if (existing) return; // Already seen
         }
 
-        // Resolve employee
+        // Resolve employee (tries employeeKey first, then DNI fallback)
         const employee = await this.employeesService.findByEmployeeKey(ev.employeeKey);
         if (!employee) {
-            // Unknown badge / employee not in system yet — log but don't crash
-            this.logger.warn(`employeeKey "${ev.employeeKey}" (${ev.name}) not found in DB — skipping.`);
-            return;
+            this.logger.warn(`employeeKey "${ev.employeeKey}" (${ev.name}) not found in DB — saving event without employee link.`);
         }
 
         // Parse timestamp — prefer deviceMs for accuracy
@@ -174,7 +172,7 @@ export class HikvisionPollerService implements OnModuleInit {
         }
 
         const event = this.eventsRepo.create({
-            employee,
+            ...(employee ? { employee } : {}),
             timestamp,
             deviceId: ev.deviceIp || ev.macAddress || 'hikvision',
             type: EventType.UNKNOWN, // IN/OUT resolved later by AttendanceProcessorService
@@ -186,7 +184,7 @@ export class HikvisionPollerService implements OnModuleInit {
 
         await this.eventsRepo.save(event);
         this.logger.verbose(
-            `Saved event: emp="${ev.employeeKey}" name="${ev.name}" ts="${timestamp.toISOString()}" serialNo=${ev.serialNo}`,
+            `Saved event: emp="${ev.employeeKey}" name="${ev.name}" ts="${timestamp.toISOString()}" serialNo=${ev.serialNo} linked=${!!employee}`,
         );
     }
 

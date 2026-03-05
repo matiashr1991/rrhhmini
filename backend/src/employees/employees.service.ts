@@ -52,8 +52,14 @@ export class EmployeesService {
         });
     }
 
-    findByEmployeeKey(employeeKey: string): Promise<Employee | null> {
-        return this.employeesRepository.findOne({ where: { employeeKey } });
+    async findByEmployeeKey(employeeKey: string): Promise<Employee | null> {
+        // First try exact match on employeeKey (legajo)
+        const byKey = await this.employeesRepository.findOne({ where: { employeeKey } });
+        if (byKey) return byKey;
+
+        // Fallback: try matching by DNI (the device may still send the old DNI as identifier)
+        const byDni = await this.employeesRepository.findOne({ where: { dni: employeeKey } });
+        return byDni;
     }
 
     findByDni(dni: string): Promise<Employee | null> {
