@@ -73,6 +73,15 @@ export default function AttendancePage() {
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
+    // Admin check
+    const [isAdmin, setIsAdmin] = useState(false);
+    useEffect(() => {
+        try {
+            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            setIsAdmin(u?.role === 'ADMIN');
+        } catch { setIsAdmin(false); }
+    }, []);
+
     useEffect(() => {
         if (activeTab === 'daily') fetchDaily();
         else fetchLogs();
@@ -205,13 +214,15 @@ export default function AttendancePage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={openModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-eco-700 hover:bg-eco-800 text-white font-medium rounded-lg transition shadow-sm text-sm"
-                    >
-                        <Plus size={16} />
-                        Cargar Fichada
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={openModal}
+                            className="flex items-center gap-2 px-4 py-2 bg-eco-700 hover:bg-eco-800 text-white font-medium rounded-lg transition shadow-sm text-sm"
+                        >
+                            <Plus size={16} />
+                            Cargar Fichada
+                        </button>
+                    )}
                     <div className="flex bg-gray-100 p-1 rounded-lg">
                         <button
                             onClick={() => setActiveTab('daily')}

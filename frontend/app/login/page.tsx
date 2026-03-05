@@ -21,6 +21,7 @@ export default function LoginPage() {
         try {
             const response = await api.post('/auth/login', { username, password });
             localStorage.setItem('token', response.data.access_token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             const user = response.data.user;
             if (user?.role === 'EMPLOYEE') {
                 router.push('/portal/dashboard');

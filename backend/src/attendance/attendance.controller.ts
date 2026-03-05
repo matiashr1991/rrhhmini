@@ -1,13 +1,20 @@
-import { Controller, Get, Post, Patch, Param, Body, UseInterceptors, UploadedFile, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards, UseInterceptors, Req, BadRequestException } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { AttendanceProcessorService } from './attendance-processor.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { Role } from '../auth/role.enum';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/audit-log.entity';
 
 @Controller('attendance')
 export class AttendanceController {
     constructor(
         private readonly attendanceService: AttendanceService,
-        private readonly processor: AttendanceProcessorService
+        private readonly processor: AttendanceProcessorService,
+        private readonly auditService: AuditService,
     ) { }
 
     @Get('logs')
@@ -39,28 +46,64 @@ export class AttendanceController {
     }
 
     /**
-     * POST /attendance/manual
-     * Create a manual attendance event. Body: { employeeId, timestamp }
+     * POST /attendance/manual — Solo ADMIN
      */
     @Post('manual')
-    async createManualEvent(@Body() body: { employeeId: string; timestamp: string }) {
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async createManualEvent(@Req() req, @Body() body: { employeeId: string; timestamp: string }) {
         if (!body.employeeId || !body.timestamp) {
             throw new BadRequestException('Se requiere employeeId y timestamp');
         }
         const event = await this.attendanceService.createManualEvent(body.employeeId, body.timestamp);
+
+        // Audit trail
+        this.auditService.log({
+            userId: req.user?.userId,
+            username: req.user?.username || 'unknown',
+            action: AuditAction.CREATE,
+            entity: 'AttendanceEvent',
+            entityId: event.id,
+            details: {
+                type: 'MANUAL_ENTRY',
+                employeeId: body.employeeId,
+                timestamp: body.timestamp,
+            },
+            ipAddress: req.ip || req.headers?.['x-forwarded-for'] || 'unknown',
+            userAgent: req.headers?.['user-agent'] || 'unknown',
+        });
+
         return { saved: true, id: event.id };
     }
 
     /**
-     * PATCH /attendance/daily/:id
-     * Override the status of a daily attendance record. Body: { status }
+     * PATCH /attendance/daily/:id — Solo ADMIN
      */
     @Patch('daily/:id')
-    async updateDailyStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async updateDailyStatus(@Req() req, @Param('id') id: string, @Body() body: { status: string }) {
         if (!body.status) {
             throw new BadRequestException('Se requiere status');
         }
-        return this.attendanceService.updateDailyStatus(id, body.status);
+        const result = await this.attendanceService.updateDailyStatus(id, body.status);
+
+        // Audit trail
+        this.auditService.log({
+            userId: req.user?.userId,
+            username: req.user?.username || 'unknown',
+            action: AuditAction.UPDATE,
+            entity: 'DailyAttendance',
+            entityId: id,
+            details: {
+                type: 'MANUAL_STATUS_OVERRIDE',
+                newStatus: body.status,
+            },
+            ipAddress: req.ip || req.headers?.['x-forwarded-for'] || 'unknown',
+            userAgent: req.headers?.['user-agent'] || 'unknown',
+        });
+
+        return result;
     }
 }
 

@@ -10,12 +10,14 @@ import { LeaveRequestsModule } from '../leave-requests/leave-requests.module';
 import { Holiday } from './holiday.entity';
 import { HolidaysService } from './holidays.service';
 import { HolidaysController } from './holidays.controller';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([AttendanceEvent, DailyAttendance, Holiday]),
         EmployeesModule,
-        LeaveRequestsModule
+        LeaveRequestsModule,
+        AuditModule,
     ],
     providers: [AttendanceService, AttendanceProcessorService, HolidaysService],
     controllers: [AttendanceController, HolidaysController],
