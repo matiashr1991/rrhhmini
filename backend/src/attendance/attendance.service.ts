@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AttendanceEvent, EventType } from './attendance-event.entity';
+import { DailyAttendance } from './daily-attendance.entity';
 import { EmployeesService } from '../employees/employees.service';
 
 @Injectable()
@@ -11,6 +12,8 @@ export class AttendanceService {
     constructor(
         @InjectRepository(AttendanceEvent)
         private eventsRepository: Repository<AttendanceEvent>,
+        @InjectRepository(DailyAttendance)
+        private dailyRepo: Repository<DailyAttendance>,
         private employeesService: EmployeesService,
     ) { }
 
@@ -57,16 +60,12 @@ export class AttendanceService {
         event.deviceId = deviceIp;
         event.serialNo = serialNo;
         event.rawData = payload;
-        event.type = EventType.UNKNOWN; // We can infer IN/OUT later based on time logic
+        event.type = EventType.UNKNOWN;
 
         if (employee) {
             event.employee = employee;
         } else {
             this.logger.warn(`Event for unknown employee key: ${employeeKey}`);
-            // We still save it, but without relation? Or maybe we strictly need relation?
-            // For now let's save it to capture the log.
-            // Note: AttendanceEvent.employee is ManyToOne, likely nullable by default unless specified.
-            // Let's check entity definition. If it's nullable, we are good.
         }
 
         await this.eventsRepository.save(event);
@@ -76,5 +75,50 @@ export class AttendanceService {
     async create(data: Partial<AttendanceEvent>): Promise<AttendanceEvent> {
         const event = this.eventsRepository.create(data);
         return this.eventsRepository.save(event);
+    }
+
+    /**
+     * Create a manual attendance event from the UI.
+     */
+    async createManualEvent(employeeId: string, timestamp: string): Promise<AttendanceEvent> {
+        const employee = await this.employeesService.findOne(employeeId);
+        if (!employee) {
+            throw new NotFoundException(`Empleado ${employeeId} no encontrado`);
+        }
+
+        const ts = new Date(timestamp);
+        if (isNaN(ts.getTime())) {
+            throw new BadRequestException('Fecha/hora inválida');
+        }
+
+        const event = this.eventsRepository.create({
+            employee,
+            timestamp: ts,
+            deviceId: 'manual',
+            type: EventType.UNKNOWN,
+            rawData: { manual: true, createdAt: new Date().toISOString() },
+            isProcessed: false,
+        });
+
+        return this.eventsRepository.save(event);
+    }
+
+    /**
+     * Override the status of a daily attendance record.
+     */
+    async updateDailyStatus(dailyId: string, status: string): Promise<DailyAttendance> {
+        const daily = await this.dailyRepo.findOne({ where: { id: dailyId }, relations: ['employee'] });
+        if (!daily) {
+            throw new NotFoundException(`Registro diario ${dailyId} no encontrado`);
+        }
+
+        const validStatuses = ['PRESENT', 'ABSENT', 'LICENSE', 'HOLIDAY', 'OFF'];
+        if (!validStatuses.includes(status)) {
+            throw new BadRequestException(`Estado inválido: ${status}`);
+        }
+
+        daily.status = status;
+        daily.isAbsent = status === 'ABSENT';
+        return this.dailyRepo.save(daily);
     }
 }

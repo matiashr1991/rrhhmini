@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseInterceptors, UploadedFile, Req, BadRequestException } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { AttendanceProcessorService } from './attendance-processor.service';
-import { FileInterceptor } from '@nestjs/platform-express'; // We might need this if we handle multipart/form-data with file upload, but Hikvision sends a field `event_log` which is a string.
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -18,25 +18,15 @@ export class AttendanceController {
     @Get('daily')
     async getDaily(@Req() req) {
         const date = req.query.date || new Date().toISOString().split('T')[0];
-        // Trigger processing on demand for now (in production this should be async or cron)
         await this.processor.processDay(date);
         return this.processor.getDailyReport(date);
     }
 
-    // Endpoint that matches legacy /hikvision/events but we'll use /attendance/hikvision
-    // Legacy used multipart/form-data with a field 'event_log' containing JSON.
-    // NestJS FileInterceptor handles multipart.
     @Post('hikvision')
-    @UseInterceptors(FileInterceptor('file')) // Dummy interceptor to handle multipart ?
-    // Actually, to read a field from multipart without a file, we can use @Body().
-    // However, NestJS requires Multer for multipart.
+    @UseInterceptors(FileInterceptor('file'))
     async handleHikvision(@Req() req, @Body() body) {
-        // If the device sends application/json, body will be the object.
-        // If it sends multipart/form-data, we need to extract 'event_log'.
-
         let payload = body;
 
-        // If 'event_log' field exists (legacy style)
         if (body.event_log) {
             try {
                 payload = JSON.parse(body.event_log);
@@ -47,4 +37,30 @@ export class AttendanceController {
 
         return this.attendanceService.processHikvisionEvent(payload);
     }
+
+    /**
+     * POST /attendance/manual
+     * Create a manual attendance event. Body: { employeeId, timestamp }
+     */
+    @Post('manual')
+    async createManualEvent(@Body() body: { employeeId: string; timestamp: string }) {
+        if (!body.employeeId || !body.timestamp) {
+            throw new BadRequestException('Se requiere employeeId y timestamp');
+        }
+        const event = await this.attendanceService.createManualEvent(body.employeeId, body.timestamp);
+        return { saved: true, id: event.id };
+    }
+
+    /**
+     * PATCH /attendance/daily/:id
+     * Override the status of a daily attendance record. Body: { status }
+     */
+    @Patch('daily/:id')
+    async updateDailyStatus(@Param('id') id: string, @Body() body: { status: string }) {
+        if (!body.status) {
+            throw new BadRequestException('Se requiere status');
+        }
+        return this.attendanceService.updateDailyStatus(id, body.status);
+    }
 }
+
