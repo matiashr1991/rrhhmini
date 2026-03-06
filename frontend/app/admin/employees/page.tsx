@@ -41,8 +41,8 @@ export default function EmployeesPage() {
         if (!confirm('¿Estás seguro de eliminar este empleado?')) return;
         try {
             await api.delete(`/employees/${id}`);
-            // Soft delete: update state to inactive instead of removing
-            setEmployees(employees.map(e => e.id === id ? { ...e, isActive: false } : e));
+            // Soft delete: remove from local state so it instantly disappears from the UI
+            setEmployees(employees.filter(e => e.id !== id));
         } catch (error) {
             console.error('Error deleting employee:', error);
             alert('Error al eliminar empleado');

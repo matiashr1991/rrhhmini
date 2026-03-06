@@ -33,6 +33,7 @@ export class EmployeesService {
 
     findAll(): Promise<Employee[]> {
         return this.employeesRepository.find({
+            where: { isActive: true },
             relations: [
                 'category', 'jurisdiction', 'gender', 'maritalStatus',
                 'orgUnit', 'grouping', 'plantType1', 'plantType2',
