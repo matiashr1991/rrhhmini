@@ -2,7 +2,10 @@ import axios from 'axios';
 
 // Prod: Traefik rutea /api → backend NestJS
 // Dev:  setear NEXT_PUBLIC_API_URL=http://localhost:8000
-const baseURL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+const baseURL =
+    process.env.NODE_ENV === 'production'
+        ? '/api'
+        : (process.env.NEXT_PUBLIC_API_URL ?? '/api');
 
 const api = axios.create({
     baseURL,
