@@ -18,8 +18,8 @@ export class AttendanceController {
     ) { }
 
     @Get('logs')
-    findAll() {
-        return this.attendanceService.findAll();
+    findAll(@Req() req) {
+        return this.attendanceService.findAll(req.query.date as string);
     }
 
     @Get('daily')

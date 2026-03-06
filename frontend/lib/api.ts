@@ -12,8 +12,16 @@ const api = axios.create({
     },
 });
 
-// Inyectar token JWT en cada request
+// Inyectar token JWT en cada request y arreglar pathing de Axios
 api.interceptors.request.use((config) => {
+    // Asegurar que baseURL y url se concatenen bien aunque la url empiece con '/'
+    if (config.url?.startsWith('/')) {
+        config.url = config.url.substring(1);
+    }
+    if (config.baseURL && !config.baseURL.endsWith('/')) {
+        config.baseURL += '/';
+    }
+
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('token');
         if (token) {

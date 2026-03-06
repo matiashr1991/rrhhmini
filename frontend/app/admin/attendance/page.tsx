@@ -109,7 +109,8 @@ export default function AttendancePage() {
         setLoading(true);
         setError('');
         try {
-            const res = await api.get('/attendance/logs');
+            const query = date ? `?date=${date}` : '';
+            const res = await api.get(`/attendance/logs${query}`);
             setEvents(res.data);
         } catch (error: any) {
             console.error('Error fetching attendance logs:', error);
@@ -240,25 +241,22 @@ export default function AttendancePage() {
                 </div>
             </div>
 
-            {/* Controls bar: date picker + search */}
             <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                {activeTab === 'daily' && (
-                    <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                            <Calendar size={16} />
-                            Fecha:
-                        </label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
-                        />
-                        <button onClick={fetchDaily} className="p-2 text-eco-700 hover:bg-eco-50 rounded-lg">
-                            <RotateCcw size={18} />
-                        </button>
-                    </div>
-                )}
+                <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <Calendar size={16} />
+                        Fecha:
+                    </label>
+                    <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="border border-gray-300 rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
+                    />
+                    <button onClick={activeTab === 'daily' ? fetchDaily : fetchLogs} className="p-2 text-eco-700 hover:bg-eco-50 rounded-lg">
+                        <RotateCcw size={18} />
+                    </button>
+                </div>
 
                 {/* Search bar */}
                 <div className="relative flex-1 max-w-md">

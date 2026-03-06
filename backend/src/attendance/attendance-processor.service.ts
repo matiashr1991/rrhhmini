@@ -27,10 +27,10 @@ export class AttendanceProcessorService {
         // 1. Get all active employees
         const employees = await this.employeesService.findAll();
 
-        // 2. Define day range
-        // Assuming dateStr is YYYY-MM-DD
-        const startOfDay = new Date(`${dateStr}T00:00:00`);
-        const endOfDay = new Date(`${dateStr}T23:59:59`);
+        // 2. Define day range safely
+        // dateStr is YYYY-MM-DD
+        const startOfDay = new Date(`${dateStr}T00:00:00.000`);
+        const endOfDay = new Date(`${dateStr}T23:59:59.999`);
 
         for (const emp of employees) {
             // Find existing daily record or create new
@@ -105,7 +105,18 @@ export class AttendanceProcessorService {
                 daily.status = 'PRESENT';
                 daily.isAbsent = false;
                 daily.inTime = events[0].timestamp;
-                daily.outTime = events.length > 1 ? events[events.length - 1].timestamp : null;
+
+                // Deduplicate exit punch: Must be at least 10 minutes later than inTime
+                let latestValidExit: Date | null = null;
+                for (let i = events.length - 1; i > 0; i--) {
+                    const timeDiffMs = events[i].timestamp.getTime() - events[0].timestamp.getTime();
+                    if (timeDiffMs > 10 * 60 * 1000) { // 10 minutes
+                        latestValidExit = events[i].timestamp;
+                        break;
+                    }
+                }
+
+                daily.outTime = latestValidExit;
 
                 // Calculate hours
                 if (daily.outTime && daily.inTime) {

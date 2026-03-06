@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { AttendanceEvent, EventType } from './attendance-event.entity';
 import { DailyAttendance } from './daily-attendance.entity';
 import { EmployeesService } from '../employees/employees.service';
@@ -17,12 +17,25 @@ export class AttendanceService {
         private employeesService: EmployeesService,
     ) { }
 
-    async findAll(): Promise<AttendanceEvent[]> {
-        return this.eventsRepository.find({
+    async findAll(date?: string): Promise<AttendanceEvent[]> {
+        const query: any = {
             order: { timestamp: 'DESC' },
             relations: ['employee'],
-            take: 100 // Limit to last 100 for now
-        });
+        };
+
+        if (date) {
+            const startOfDay = new Date(`${date}T00:00:00.000`);
+            const endOfDay = new Date(`${date}T23:59:59.999`);
+            // Adjust bounds to prevent Timezone shift dropping end of day events if server is in different TZ
+            // Here we assume the Date constructor parses Local Time accurately for the server.
+            query.where = { timestamp: Between(startOfDay, endOfDay) };
+            // Optional: increase or remove take limit since we're scoped by date
+            query.take = 5000;
+        } else {
+            query.take = 200; // Limit to last 200 if no date provided
+        }
+
+        return this.eventsRepository.find(query);
     }
 
     async processHikvisionEvent(payload: any) {
