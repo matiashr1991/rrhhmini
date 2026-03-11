@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { UserPlus, Pencil, Trash2, Search } from 'lucide-react';
+import { UserPlus, Pencil, Search, Power } from 'lucide-react';
 
 interface Employee {
     id: string;
@@ -21,6 +21,8 @@ export default function EmployeesPage() {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+    const [togglingId, setTogglingId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchEmployees();
@@ -37,24 +39,39 @@ export default function EmployeesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de eliminar este empleado?')) return;
+    const handleToggleActive = async (emp: Employee) => {
+        const action = emp.isActive ? 'desactivar' : 'activar';
+        if (!confirm(`¿Estás seguro de ${action} a ${emp.lastName}, ${emp.firstName}?`)) return;
+
+        setTogglingId(emp.id);
         try {
-            await api.delete(`/employees/${id}`);
-            // Soft delete: remove from local state so it instantly disappears from the UI
-            setEmployees(employees.filter(e => e.id !== id));
+            const response = await api.patch(`/employees/${emp.id}/toggle-active`);
+            setEmployees(employees.map(e => e.id === emp.id ? { ...e, isActive: response.data.isActive } : e));
         } catch (error) {
-            console.error('Error deleting employee:', error);
-            alert('Error al eliminar empleado');
+            console.error('Error toggling employee status:', error);
+            alert('Error al cambiar el estado del empleado');
+        } finally {
+            setTogglingId(null);
         }
     };
 
-    const filteredEmployees = employees.filter(emp =>
-        emp.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.employeeKey.includes(searchTerm) ||
-        (emp.dni && emp.dni.includes(searchTerm))
-    );
+    const filteredEmployees = employees.filter(emp => {
+        const matchesSearch =
+            emp.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            emp.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            emp.employeeKey.includes(searchTerm) ||
+            (emp.dni && emp.dni.includes(searchTerm));
+
+        const matchesFilter =
+            filterStatus === 'all' ? true :
+            filterStatus === 'active' ? emp.isActive :
+            !emp.isActive;
+
+        return matchesSearch && matchesFilter;
+    });
+
+    const activeCount = employees.filter(e => e.isActive).length;
+    const inactiveCount = employees.filter(e => !e.isActive).length;
 
     return (
         <div className="p-8 max-w-7xl mx-auto">
@@ -74,7 +91,7 @@ export default function EmployeesPage() {
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {/* Toolbar */}
-                <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex gap-4">
+                <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
@@ -84,6 +101,26 @@ export default function EmployeesPage() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setFilterStatus('all')}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${filterStatus === 'all' ? 'bg-eco-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            Todos ({employees.length})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('active')}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${filterStatus === 'active' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            Activos ({activeCount})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('inactive')}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${filterStatus === 'inactive' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            Inactivos ({inactiveCount})
+                        </button>
                     </div>
                 </div>
 
@@ -105,7 +142,7 @@ export default function EmployeesPage() {
                             ) : filteredEmployees.length === 0 ? (
                                 <tr><td colSpan={6} className="p-8 text-center text-gray-500">No se encontraron empleados.</td></tr>
                             ) : filteredEmployees.map((emp) => (
-                                <tr key={emp.id} className="hover:bg-eco-50/30 transition group">
+                                <tr key={emp.id} className={`hover:bg-eco-50/30 transition group ${!emp.isActive ? 'opacity-60' : ''}`}>
                                     <td className="p-4 pl-6 font-mono text-gray-600">{emp.employeeKey}</td>
                                     <td className="p-4">
                                         <div className="font-medium text-gray-900">{emp.lastName}, {emp.firstName}</div>
@@ -121,14 +158,19 @@ export default function EmployeesPage() {
                                     </td>
                                     <td className="p-4 text-right pr-6">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Link href={`/admin/employees/${emp.id}/edit`} className="p-2 text-gray-400 hover:text-eco-700 hover:bg-eco-50 rounded-lg transition">
+                                            <Link href={`/admin/employees/${emp.id}/edit`} className="p-2 text-gray-400 hover:text-eco-700 hover:bg-eco-50 rounded-lg transition" title="Editar">
                                                 <Pencil size={18} />
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(emp.id)}
-                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                onClick={() => handleToggleActive(emp)}
+                                                disabled={togglingId === emp.id}
+                                                className={`p-2 rounded-lg transition ${emp.isActive
+                                                        ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
+                                                        : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                                                    } disabled:opacity-50`}
+                                                title={emp.isActive ? 'Desactivar empleado' : 'Activar empleado'}
                                             >
-                                                <Trash2 size={18} />
+                                                <Power size={18} />
                                             </button>
                                         </div>
                                     </td>

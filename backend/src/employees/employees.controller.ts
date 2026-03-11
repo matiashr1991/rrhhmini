@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch, UseGuards } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { Employee } from './employee.entity';
 import { Category } from './category.entity';
@@ -65,6 +65,12 @@ export class EmployeesController {
     @Roles(Role.ADMIN, Role.ADMINISTRATIVE)
     update(@Param('id') id: string, @Body() employee: Employee): Promise<Employee | null> {
         return this.employeesService.update(id, employee);
+    }
+
+    @Patch(':id/toggle-active')
+    @Roles(Role.ADMIN)
+    toggleActive(@Param('id') id: string) {
+        return this.employeesService.toggleActive(id);
     }
 
     @Delete(':id')

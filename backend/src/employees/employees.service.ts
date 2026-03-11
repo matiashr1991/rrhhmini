@@ -33,7 +33,7 @@ export class EmployeesService {
 
     findAll(): Promise<Employee[]> {
         return this.employeesRepository.find({
-            where: { isActive: true },
+            order: { lastName: 'ASC', firstName: 'ASC' },
             relations: [
                 'category', 'jurisdiction', 'gender', 'maritalStatus',
                 'orgUnit', 'grouping', 'plantType1', 'plantType2',
@@ -85,6 +85,14 @@ export class EmployeesService {
         await this.employeesRepository.update(id, { isActive: false });
     }
 
+    async toggleActive(id: string): Promise<Employee | null> {
+        const emp = await this.employeesRepository.findOne({ where: { id } });
+        if (!emp) return null;
+        emp.isActive = !emp.isActive;
+        await this.employeesRepository.save(emp);
+        return this.findOne(id);
+    }
+
     async getParametrics() {
         const [
             categories, jurisdictions, maritalStatuses, genders,
@@ -128,15 +136,38 @@ export class EmployeesService {
         }
     }
 
+    /**
+     * Limpia el payload genérico del frontend ({name, description}) para 
+     * enviar solo los campos que corresponden a cada tipo de entidad.
+     * - Category → description (no tiene name)
+     * - Jurisdiction → name (no tiene description)
+     * - Todas las demás → name
+     */
+    private cleanParametricData(type: string, data: any): any {
+        const value = data.description || data.name || '';
+        switch (type) {
+            case 'categories':
+                return { description: value };
+            case 'jurisdictions':
+                return { name: value };
+            default:
+                // Gender, MaritalStatus, OrgUnit, Grouping, PlantType1, PlantType2,
+                // FunctionArea, Workplace, RetirementStatus — all use 'name'
+                return { name: value };
+        }
+    }
+
     async createParametric(type: string, data: any) {
         const repo = this.getRepositoryByType(type);
-        const entity = repo.create(data);
+        const cleanData = this.cleanParametricData(type, data);
+        const entity = repo.create(cleanData);
         return await repo.save(entity);
     }
 
     async updateParametric(type: string, id: string | number, data: any) {
         const repo = this.getRepositoryByType(type);
-        await repo.update(id, data);
+        const cleanData = this.cleanParametricData(type, data);
+        await repo.update(id, cleanData);
         return await repo.findOne({ where: { id } });
     }
 
