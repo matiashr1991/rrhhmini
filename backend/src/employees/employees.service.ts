@@ -139,17 +139,30 @@ export class EmployeesService {
     /**
      * Limpia el payload genérico del frontend ({name, description}) para 
      * enviar solo los campos que corresponden a cada tipo de entidad.
-     * - Category → description (no tiene name)
-     * - Jurisdiction → name (no tiene description)
+     * - Category → description (no tiene name) y opcionalmente level si es numérico
+     * - Jurisdiction → name y code
      * - Todas las demás → name
      */
     private cleanParametricData(type: string, data: any): any {
         const value = data.description || data.name || '';
         switch (type) {
             case 'categories':
-                return { description: value };
+                const catData: any = { description: value };
+                const numValue = parseInt(value, 10);
+                if (!isNaN(numValue)) {
+                    catData.level = numValue;
+                }
+                return catData;
             case 'jurisdictions':
-                return { name: value };
+                // Si el usuario ingresa "1 - Central", usamos 1 como code y Central como name
+                if (value.includes(' - ')) {
+                    const [code, ...nameParts] = value.split(' - ');
+                    return {
+                        code: code.trim(),
+                        name: nameParts.join(' - ').trim()
+                    };
+                }
+                return { code: value, name: value };
             default:
                 // Gender, MaritalStatus, OrgUnit, Grouping, PlantType1, PlantType2,
                 // FunctionArea, Workplace, RetirementStatus — all use 'name'
@@ -160,6 +173,16 @@ export class EmployeesService {
     async createParametric(type: string, data: any) {
         const repo = this.getRepositoryByType(type);
         const cleanData = this.cleanParametricData(type, data);
+
+        // Lógica de auto-asignación para campos obligatorios faltantes
+        if (type === 'categories' && cleanData.level === undefined) {
+            const maxLevelObj = await repo
+                .createQueryBuilder('category')
+                .select('MAX(category.level)', 'max')
+                .getRawOne();
+            cleanData.level = (Number(maxLevelObj?.max) || 0) + 1;
+        }
+
         const entity = repo.create(cleanData);
         return await repo.save(entity);
     }
@@ -168,7 +191,7 @@ export class EmployeesService {
         const repo = this.getRepositoryByType(type);
         const cleanData = this.cleanParametricData(type, data);
         await repo.update(id, cleanData);
-        return await repo.findOne({ where: { id } });
+        return await repo.findOne({ where: { id: id as any } });
     }
 
     async removeParametric(type: string, id: string | number) {
