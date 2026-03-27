@@ -59,8 +59,13 @@ export default function ReportsPage() {
     const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
 
     // Monthly State
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const getFirstOfMonth = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    };
+    const getToday = () => new Date().toISOString().split('T')[0];
+    const [monthlyStartDate, setMonthlyStartDate] = useState(getFirstOfMonth());
+    const [monthlyEndDate, setMonthlyEndDate] = useState(getToday());
     const [monthlyData, setMonthlyData] = useState<MonthlyRecord[]>([]);
 
     // Shared State
@@ -72,7 +77,7 @@ export default function ReportsPage() {
         if (activeTab === 'daily') fetchDailyReport();
         if (activeTab === 'monthly') fetchMonthlyReport();
         if (activeTab === 'holidays') fetchHolidays();
-    }, [activeTab, selectedDate, selectedMonth, selectedYear]);
+    }, [activeTab, selectedDate, monthlyStartDate, monthlyEndDate]);
 
     const fetchConfig = async () => {
         setLoading(true);
@@ -101,7 +106,7 @@ export default function ReportsPage() {
     const fetchMonthlyReport = async () => {
         setLoading(true);
         try {
-            const res = await api.get(`/reports/monthly?month=${selectedMonth}&year=${selectedYear}`);
+            const res = await api.get(`/reports/monthly?startDate=${monthlyStartDate}&endDate=${monthlyEndDate}`);
             setMonthlyData(res.data);
         } catch (error) {
             console.error(error);
@@ -220,7 +225,7 @@ export default function ReportsPage() {
         const wsDetail = XLSX.utils.json_to_sheet(detailData);
         XLSX.utils.book_append_sheet(wb, wsDetail, "Detalle Diario");
 
-        exportToExcel(wb, `Reporte_Mensual_${selectedMonth}_${selectedYear}`);
+        exportToExcel(wb, `Reporte_${monthlyStartDate}_a_${monthlyEndDate}`);
     };
 
     const getStatusLabel = (status: string, isLate: boolean, leaveName?: string, holidayName?: string) => {
@@ -360,20 +365,19 @@ export default function ReportsPage() {
                 <div className="space-y-6">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                         <div className="flex items-center gap-4">
-                            <select
-                                value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                className="border border-gray-300 rounded-lg px-4 py-2"
-                            >
-                                {Array.from({ length: 12 }, (_, i) => (
-                                    <option key={i + 1} value={i + 1}>{new Date(0, i).toLocaleString('es-ES', { month: 'long' })}</option>
-                                ))}
-                            </select>
+                            <label className="font-medium text-gray-700">Desde:</label>
                             <input
-                                type="number"
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="border border-gray-300 rounded-lg px-4 py-2 w-24 text-gray-900"
+                                type="date"
+                                value={monthlyStartDate}
+                                onChange={(e) => setMonthlyStartDate(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-4 py-2 text-gray-900"
+                            />
+                            <label className="font-medium text-gray-700">Hasta:</label>
+                            <input
+                                type="date"
+                                value={monthlyEndDate}
+                                onChange={(e) => setMonthlyEndDate(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-4 py-2 text-gray-900"
                             />
                         </div>
                         <button onClick={handleExportMonthly} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">

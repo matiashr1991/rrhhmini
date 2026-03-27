@@ -235,8 +235,8 @@ export class ReportsService {
         return html;
     }
 
-    async getMonthlyReport(month: number, year: number) {
-        const rawData = await this.attendanceProcessor.getMonthlyAttendance(month, year);
+    async getMonthlyReport(startDate: string, endDate: string) {
+        const rawData = await this.attendanceProcessor.getMonthlyAttendance(startDate, endDate);
         const employees = {};
 
         // Group by employee
@@ -328,7 +328,13 @@ export class ReportsService {
         const config = await this.getConfig();
         if (!config.recipients) throw new Error('No recipients configured');
 
-        const reportData = await this.getMonthlyReport(month, year);
+        // Convert month/year to date range for the report
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0);
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = endDate.toISOString().split('T')[0];
+
+        const reportData = await this.getMonthlyReport(startStr, endStr);
 
         let html = `
         <h1>Reporte Mensual - ${month}/${year}</h1>

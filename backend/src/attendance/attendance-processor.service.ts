@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Cron } from '@nestjs/schedule';
 import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { AttendanceEvent } from './attendance-event.entity';
 import { DailyAttendance } from './daily-attendance.entity';
@@ -133,6 +134,35 @@ export class AttendanceProcessorService {
         this.logger.log(`Finished processing ${dateStr}`);
     }
 
+    /**
+     * Nightly cron: process today's attendance at 23:30
+     */
+    @Cron('30 23 * * *')
+    async handleNightlyProcess() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+        this.logger.log(`Nightly cron: processing ${todayStr}...`);
+        await this.processDay(todayStr);
+    }
+
+    /**
+     * Overnight cron: reprocess yesterday at 00:30 to catch late events
+     */
+    @Cron('30 0 * * *')
+    async handleOvernightReprocess() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const year = yesterday.getFullYear();
+        const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const day = String(yesterday.getDate()).padStart(2, '0');
+        const yStr = `${year}-${month}-${day}`;
+        this.logger.log(`Overnight cron: reprocessing ${yStr}...`);
+        await this.processDay(yStr);
+    }
+
     async getDailyReport(dateStr: string) {
         return this.dailyRepo.find({
             where: { date: dateStr },
@@ -141,13 +171,7 @@ export class AttendanceProcessorService {
         });
     }
 
-    async getMonthlyAttendance(month: number, year: number) {
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0); // Last day of month
-
-        const startStr = startDate.toISOString().split('T')[0];
-        const endStr = endDate.toISOString().split('T')[0];
-
+    async getMonthlyAttendance(startStr: string, endStr: string) {
         return this.dailyRepo.find({
             where: {
                 date: Between(startStr, endStr)
