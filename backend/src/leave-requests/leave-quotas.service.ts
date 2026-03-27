@@ -149,7 +149,8 @@ export class LeaveQuotasService {
             maxDays,
             usedDays,
             remainingDays,
-            limitReason
+            limitReason,
+            allowExceed: !!leaveType.allowExceed,
         };
     }
 }

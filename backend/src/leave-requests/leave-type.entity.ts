@@ -22,4 +22,7 @@ export class LeaveType {
 
     @Column({ type: 'int', nullable: true, default: null })
     maxDaysPerMonth: number | null; // null = no monthly cap
+
+    @Column({ default: false })
+    allowExceed: boolean; // If true, allows exceeding quota with a warning instead of blocking
 }

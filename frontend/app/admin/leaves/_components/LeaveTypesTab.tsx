@@ -12,6 +12,7 @@ interface LeaveType {
     isActive: boolean;
     maxDaysPerYear: number | null;
     maxDaysPerMonth: number | null;
+    allowExceed: boolean;
 }
 
 const emptyForm = (): Partial<LeaveType> => ({
@@ -20,6 +21,7 @@ const emptyForm = (): Partial<LeaveType> => ({
     requiresApproval: false,
     maxDaysPerYear: null,
     maxDaysPerMonth: null,
+    allowExceed: false,
 });
 
 export default function LeaveTypesTab() {
@@ -52,6 +54,7 @@ export default function LeaveTypesTab() {
                 requiresApproval: type.requiresApproval,
                 maxDaysPerYear: type.maxDaysPerYear ?? null,
                 maxDaysPerMonth: type.maxDaysPerMonth ?? null,
+                allowExceed: type.allowExceed || false,
             });
         } else {
             setEditingId(null);
@@ -120,6 +123,7 @@ export default function LeaveTypesTab() {
                                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Aprobación?</th>
                                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Máx/Año</th>
                                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Máx/Mes</th>
+                                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Excedible</th>
                                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -157,6 +161,15 @@ export default function LeaveTypesTab() {
                                             <span className="text-xs text-gray-400">Sin límite</span>
                                         )}
                                     </td>
+                                    <td className="p-4 text-center">
+                                        {type.allowExceed ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                                ⚠️ Sí
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-gray-400">No</span>
+                                        )}
+                                    </td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button
@@ -179,7 +192,7 @@ export default function LeaveTypesTab() {
                             ))}
                             {leaveTypes.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-500">
+                                    <td colSpan={7} className="p-8 text-center text-gray-500">
                                         No hay tipos de licencia configurados.
                                     </td>
                                 </tr>
@@ -251,6 +264,19 @@ export default function LeaveTypesTab() {
                                 </div>
                                 <p className="text-xs text-eco-700">Dejar vacío = sin límite. Cada tipo tiene su propio contador, no comparten cuota entre sí.</p>
                             </div>
+
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border border-amber-200 rounded-lg bg-amber-50 hover:bg-amber-100 transition">
+                                <input
+                                    type="checkbox"
+                                    className="w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
+                                    checked={formData.allowExceed}
+                                    onChange={e => setFormData({ ...formData, allowExceed: e.target.checked })}
+                                />
+                                <div>
+                                    <div className="text-sm font-medium text-gray-900">Permitir Exceder Cupo</div>
+                                    <div className="text-xs text-gray-500">Si se activa, el sistema permitirá cargar más días de los autorizados pero mostrará una advertencia.</div>
+                                </div>
+                            </label>
 
                             <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                                 <input

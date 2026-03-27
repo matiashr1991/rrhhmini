@@ -136,18 +136,18 @@ export default function LeaveRequestsPage() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post('/leave-requests', {
+            const res = await api.post('/leave-requests', {
                 ...newRequest,
-                type: { id: Number(newRequest.typeId) } // Backend expects type object or ID? Service uses createLeaveDto which maps to entity. 
-                // Using nested object for relations is safer if using DeepPartial, but let's check service.
-                // Service: createLeaveDto: Partial<LeaveRequest>. 
-                // Controller: const { employeeId, ...data } = body;
-                // If we send { type: { id: 1 } }, TypeORM handles it.
+                type: { id: Number(newRequest.typeId) }
             });
             setIsModalOpen(false);
             setNewRequest({ employeeId: '', typeId: '', startDate: '', endDate: '', reason: '' });
             fetchRequests();
-            alert('Solicitud creada exitosamente');
+            if (res.data?.quotaWarning) {
+                alert(`Solicitud creada, pero con advertencia:\n\n${res.data.quotaWarning}`);
+            } else {
+                alert('Solicitud creada exitosamente');
+            }
         } catch (error: any) {
             console.error(error);
             alert(error.response?.data?.message || 'Error al crear solicitud');

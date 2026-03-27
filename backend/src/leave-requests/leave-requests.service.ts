@@ -17,7 +17,7 @@ export class LeaveRequestsService {
         private leaveQuotasService: LeaveQuotasService,
     ) { }
 
-    async create(createLeaveDto: Partial<LeaveRequest>, employee: Employee): Promise<LeaveRequest> {
+    async create(createLeaveDto: Partial<LeaveRequest>, employee: Employee): Promise<LeaveRequest & { quotaWarning?: string }> {
         if (!createLeaveDto.startDate || !createLeaveDto.endDate) {
             throw new BadRequestException('Fechas de inicio y fin son requeridas');
         }
@@ -41,16 +41,25 @@ export class LeaveRequestsService {
         const year = new Date(createLeaveDto.startDate).getFullYear();
 
         // Check against Quota
-        // Note: createLeaveDto.type might be a number or an object depending on the controller parsing
         const typeId = typeof createLeaveDto.type === 'object' ? createLeaveDto.type.id : (createLeaveDto as any).type;
+
+        let quotaWarning: string | undefined;
 
         if (typeId) {
             const quotaInfo: any = await this.leaveQuotasService.getRemainingDays(employee.id, typeId, year);
             if (quotaInfo && quotaInfo.remainingDays < diffDays) {
-                if (quotaInfo.limitReason) {
-                    throw new BadRequestException(`Cupo excedido. Límite aplicable: ${quotaInfo.limitReason}. Solés ${diffDays} día(s) pero te quedan ${quotaInfo.remainingDays} disponibles en este período.`);
+                const excessDays = diffDays - Math.max(0, quotaInfo.remainingDays);
+                // Check if this leave type allows exceeding
+                if (quotaInfo.allowExceed) {
+                    // Allow but warn
+                    const limitLabel = quotaInfo.limitReason || `Anual (Máx ${quotaInfo.maxDays})`;
+                    quotaWarning = `⚠️ Cupo excedido por ${excessDays} día(s). Límite: ${limitLabel}.`;
+                } else {
+                    if (quotaInfo.limitReason) {
+                        throw new BadRequestException(`Cupo excedido. Límite aplicable: ${quotaInfo.limitReason}. Solés ${diffDays} día(s) pero te quedan ${quotaInfo.remainingDays} disponibles en este período.`);
+                    }
+                    throw new BadRequestException(`Cupo excedido. Solés ${diffDays} día(s) pero te quedan ${quotaInfo.remainingDays} de ${quotaInfo.maxDays} para el año ${year}.`);
                 }
-                throw new BadRequestException(`Cupo excedido. Solés ${diffDays} día(s) pero te quedan ${quotaInfo.remainingDays} de ${quotaInfo.maxDays} para el año ${year}.`);
             }
         }
         // ------------------------
@@ -65,13 +74,13 @@ export class LeaveRequestsService {
         // Notify Admins
         await this.notificationsService.createNotification({
             title: 'Nueva Solicitud de Licencia',
-            message: `${fullEmployee.firstName} ${fullEmployee.lastName} ha solicitado una licencia que requiere aprobación.`,
+            message: `${fullEmployee.firstName} ${fullEmployee.lastName} ha solicitado una licencia que requiere aprobación.${quotaWarning ? ' ' + quotaWarning : ''}`,
             type: 'LEAVE_REQUEST',
             referenceId: savedLeave.id.toString(),
             userId: null // Global admin alert
         });
 
-        return savedLeave;
+        return { ...savedLeave, quotaWarning };
     }
 
     async checkConflict(employeeId: string, startDate: string, endDate: string): Promise<boolean> {
