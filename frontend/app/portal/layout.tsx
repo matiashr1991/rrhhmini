@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { LogOut, User, Menu, X, Clock } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import EcologiaLogo from '@/components/EcologiaLogo';
+import MaintenanceGuard from '@/components/MaintenanceGuard';
 
 export default function PortalLayout({
     children,
@@ -117,7 +118,7 @@ export default function PortalLayout({
                 </header>
 
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-                    {children}
+                    <MaintenanceGuard>{children}</MaintenanceGuard>
                 </main>
             </div>
         </div>
