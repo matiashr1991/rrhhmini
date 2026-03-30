@@ -131,6 +131,12 @@ dist/
 .env
 .env.*
 !.env.example
+.env-prod
+.env-dev
+.env-prod.local
+.env-dev.local
+!.env-prod.example
+!.env-dev.example
 backend/.env
 backend/.env.*
 !backend/.env.example
