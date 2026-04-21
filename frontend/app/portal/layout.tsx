@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, User, Menu, X, Clock, CalendarCheck } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import EcologiaLogo from '@/components/EcologiaLogo';
@@ -15,6 +15,7 @@ export default function PortalLayout({
     children: React.ReactNode;
 }) {
     const router = useRouter();
+    const pathname = usePathname();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
 
@@ -87,7 +88,7 @@ export default function PortalLayout({
                         <Link
                             href="/portal/leaves"
                             className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition ${
-                                router.pathname === '/portal/leaves' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
+                                pathname === '/portal/leaves' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
                             }`}
                             onClick={() => setSidebarOpen(false)}
                         >
@@ -97,7 +98,7 @@ export default function PortalLayout({
                         <Link
                             href="/portal/attendance"
                             className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition ${
-                                router.pathname === '/portal/attendance' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
+                                pathname === '/portal/attendance' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
                             }`}
                             onClick={() => setSidebarOpen(false)}
                         >
