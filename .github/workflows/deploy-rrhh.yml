@@ -99,19 +99,4 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
         run: |
           set -euxo pipefail
-
-          ssh -p "${{ secrets.VPS_PORT }}" -i ~/.ssh/id_ed25519 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "
-            set -e
-            cd /opt/deploy/rrhhmini
-
-            set -a
-            . '${REMOTE_ENV_FILE}'
-            set +a
-
-            export BACKEND_IMAGE='${BACKEND_IMAGE}'
-            export FRONTEND_IMAGE='${FRONTEND_IMAGE}'
-
-            echo '${GHCR_PAT}' | docker login ghcr.io -u '${GHCR_USERNAME}' --password-stdin
-            docker stack deploy --with-registry-auth -c stack.yml ${STACK_NAME}
-            docker logout ghcr.io || true
-          "
+          ssh -p "${{ secrets.VPS_PORT }}" -i ~/.ssh/id_ed25519 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "set -e; cd /opt/deploy/rrhhmini; set -a; . '${REMOTE_ENV_FILE}'; set +a; export BACKEND_IMAGE='${BACKEND_IMAGE}'; export FRONTEND_IMAGE='${FRONTEND_IMAGE}'; echo '${GHCR_PAT}' | docker login ghcr.io -u '${GHCR_USERNAME}' --password-stdin; docker stack deploy --with-registry-auth -c stack.yml ${STACK_NAME}; docker logout ghcr.io || true"
