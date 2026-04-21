@@ -27,13 +27,12 @@ export class AttendanceProcessorService {
 
         const employees = await this.employeesService.findAll();
         
-        // 2. Define day range safely
-        // In ART (GMT-3): 00:00 ART is 03:00 UTC.
-        // We use local container time which is ART.
-        const startOfDay = new Date(`${dateStr}T00:00:00.000`);
-        const endOfDay = new Date(`${dateStr}T23:59:59.999`);
+        // Define local day range (handled by server's America/Argentina/Buenos_Aires TZ)
+        // We use the exact format that worked before 20/04
+        const startOfDay = new Date(`${dateStr}T00:00:00`);
+        const endOfDay = new Date(`${dateStr}T23:59:59`);
         
-        this.logger.debug(`Query window (ISO): ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
+        this.logger.debug(`Query window (Local): ${startOfDay.toISOString()} - ${endOfDay.toISOString()}`);
 
         // 3. Fetch all required data for the day
         const [allEvents, allDaily, allLeaves, holiday] = await Promise.all([
@@ -55,10 +54,13 @@ export class AttendanceProcessorService {
         // 4. Group data by employeeId for fast lookup
         const eventsMap = new Map<string, AttendanceEvent[]>();
         allEvents.forEach(ev => {
-            if (!ev.employee) return;
-            const list = eventsMap.get(ev.employee.id) || [];
-            list.push(ev);
-            eventsMap.set(ev.employee.id, list);
+            // Try different ways to get employee ID to be extra safe with batch loading
+            const empId = ev.employee?.id || (ev as any).employeeId;
+            if (empId) {
+                const list = eventsMap.get(empId) || [];
+                list.push(ev);
+                eventsMap.set(empId, list);
+            }
         });
 
         const dailyMap = new Map<string, DailyAttendance>();
