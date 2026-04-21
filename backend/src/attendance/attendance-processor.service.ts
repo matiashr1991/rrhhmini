@@ -149,6 +149,24 @@ export class AttendanceProcessorService {
     }
 
     /**
+     * Scheduled 10-minute cron to keep TODAY's attendance fresh
+     * Runs every 10 minutes (except late night) to ensure dashboard accuracy
+     */
+    @Cron('0 */10 6-23 * * *')
+    async handleFrequentTodayUpdate() {
+        if (process.env.NODE_ENV === 'development' && process.env.SKIP_CRON === 'true') return;
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        this.logger.log(`Scheduled 10-minute update: processing ${todayStr}...`);
+        await this.processDay(todayStr);
+    }
+
+    /**
      * Overnight cron: reprocess yesterday at 00:30 to catch late events
      */
     @Cron('30 0 * * *')
