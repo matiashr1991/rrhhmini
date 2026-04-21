@@ -1,5 +1,6 @@
 'use client';
 
+// Portal de Asistencias - v1.1.0
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { CalendarCheck, Clock, MapPin, Loader2, ArrowLeft } from 'lucide-react';
