@@ -83,8 +83,21 @@ export class ReportsService {
         const pendingCount = allLeaves.filter(req => req.status === 'PENDING').length;
 
         const today = new Date();
-        const chartData: any[] = [];
+        const yearToday = today.getFullYear();
+        const monthToday = String(today.getMonth() + 1).padStart(2, '0');
+        const dayToday = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yearToday}-${monthToday}-${dayToday}`;
 
+        // Ensure today is processed for real-time stats if it's a working day
+        const dayOfWeekToday = today.getDay();
+        const isWeekend = dayOfWeekToday === 0 || dayOfWeekToday === 6;
+        const esFeriadoToday = await this.holidaysService.findByDate(todayStr);
+
+        if (!isWeekend && !esFeriadoToday) {
+            await this.attendanceProcessor.processDay(todayStr);
+        }
+
+        const chartData: any[] = [];
         let daysOffset = 0;
         let validDaysFound = 0;
         const rawValidDays: { d: Date; dateStr: string }[] = [];
@@ -133,12 +146,7 @@ export class ReportsService {
             });
         }
 
-        // Specifically calculate TODAY for the top KPIs
-        const yearToday = today.getFullYear();
-        const monthToday = String(today.getMonth() + 1).padStart(2, '0');
-        const dayToday = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${yearToday}-${monthToday}-${dayToday}`;
-
+        // Use the already calculated todayStr for KPIs
         const dailyToday = await this.attendanceProcessor.getDailyReport(todayStr);
         let presToday = 0; let absToday = 0; let licToday = 0;
         dailyToday.forEach(record => {
@@ -147,16 +155,6 @@ export class ReportsService {
             else if (st === 'ABSENT') absToday++;
             else if (st === 'LICENSE') licToday++;
         });
-
-        // Ensure today is processed if it's completely empty right now
-        if (presToday === 0 && absToday === 0 && licToday === 0 && totalEmployeesCount > 0) {
-            // Check if it's a valid day before processing
-            const dayOfWeek = today.getDay();
-            const esFeriado = await this.holidaysService.findByDate(todayStr);
-            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !esFeriado) {
-                await this.attendanceProcessor.processDay(todayStr);
-            }
-        }
 
         return {
             kpis: {
