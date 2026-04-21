@@ -39,6 +39,16 @@ export class AuthController {
         return this.authService.register(body.username, body.password, body.role);
     }
 
+    @Get('check-dni/:dni')
+    async checkDni(@Param('dni') dni: string) {
+        return this.authService.checkDni(dni);
+    }
+
+    @Post('self-register')
+    async selfRegister(@Body() body: { dni: string; email: string; password: string }) {
+        return this.authService.selfRegister(body.dni, body.email, body.password);
+    }
+
     @Get('users')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)

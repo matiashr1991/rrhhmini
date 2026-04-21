@@ -23,8 +23,11 @@ export default function PortalDashboard() {
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
     const [myRequests, setMyRequests] = useState<LeaveRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userName, setUserName] = useState('');
 
     useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        setUserName(user.firstName || '');
         fetchData();
     }, []);
 
@@ -74,7 +77,7 @@ export default function PortalDashboard() {
     return (
         <div className="space-y-8">
             <div className="bg-eco-700 rounded-3xl p-8 text-white shadow-xl shadow-eco-700/20">
-                <h1 className="text-3xl font-bold mb-2">Hola!</h1>
+                <h1 className="text-3xl font-bold mb-2">¡Hola, {userName}!</h1>
                 <p className="opacity-90">Bienvenido a tu portal de autogestión.</p>
             </div>
 

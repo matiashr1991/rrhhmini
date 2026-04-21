@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { Lock, User } from 'lucide-react';
+import { Lock, User, UserPlus } from 'lucide-react';
 import EcologiaLogo from '@/components/EcologiaLogo';
+import RegisterModal from '@/components/RegisterModal';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -12,6 +13,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isRegisterOpen, setRegisterOpen] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -114,12 +116,37 @@ export default function LoginPage() {
                             </span>
                         ) : 'Ingresar'}
                     </button>
+                    
+                    <div className="text-center">
+                        <button
+                            type="button"
+                            onClick={() => alert('Por favor, comunícate con el área de Recursos Humanos para blanquear tu contraseña de forma presencial.')}
+                            className="text-xs font-medium text-eco-400 hover:text-eco-600 transition underline underline-offset-4"
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    </div>
                 </form>
 
-                <p className="text-center text-xs text-eco-400 mt-6">
-                    Ministerio de Ecología — Provincia de Misiones
-                </p>
+                <div className="mt-6 flex flex-col gap-4 items-center">
+                    <button
+                        onClick={() => setRegisterOpen(true)}
+                        className="text-sm font-medium text-eco-600 hover:text-eco-800 transition flex items-center gap-2 group"
+                    >
+                        <UserPlus size={16} className="group-hover:scale-110 transition-transform" />
+                        ¿No tenés usuario? Registrarme
+                    </button>
+                    
+                    <p className="text-center text-xs text-eco-400">
+                        Ministerio de Ecología — Provincia de Misiones
+                    </p>
+                </div>
             </div>
+
+            <RegisterModal 
+                isOpen={isRegisterOpen} 
+                onClose={() => setRegisterOpen(false)} 
+            />
         </div>
     );
 }

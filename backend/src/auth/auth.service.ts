@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
+import { EmployeesService } from '../employees/employees.service';
+import { Role } from './role.enum';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,7 @@ export class AuthService {
         @InjectRepository(User)
         private usersRepository: Repository<User>,
         private jwtService: JwtService,
+        private employeesService: EmployeesService,
     ) { }
 
     async validateUser(username: string, pass: string): Promise<any> {
@@ -54,7 +57,9 @@ export class AuthService {
                 username: fullUser.username,
                 role: fullUser.role,
                 id: fullUser.id,
-                employeeId: fullUser.employee?.id
+                employeeId: fullUser.employee?.id,
+                firstName: fullUser.employee?.firstName,
+                lastName: fullUser.employee?.lastName,
             }
         };
     }
@@ -102,5 +107,52 @@ export class AuthService {
             await this.usersRepository.update(id, { role: data.role as any });
         }
         return this.usersRepository.findOne({ where: { id }, relations: ['employee'] });
+    }
+    
+    async checkDni(dni: string) {
+        const employee = await this.employeesService.findByDni(dni);
+        if (!employee) {
+            return { success: false, message: 'DNI no encontrado en los registros de empleados.' };
+        }
+
+        const user = await this.usersRepository.findOne({ 
+            where: { employee: { id: employee.id } } 
+        });
+
+        if (user) {
+            return { success: false, message: 'Este legajo ya tiene un usuario registrado.' };
+        }
+
+        return { success: true, message: 'Empleado encontrado.' };
+    }
+
+    async selfRegister(dni: string, email: string, pass: string) {
+        const employee = await this.employeesService.findByDni(dni);
+        if (!employee) {
+            throw new Error('Empleado no encontrado.');
+        }
+
+        const existingUser = await this.usersRepository.findOne({ 
+            where: { employee: { id: employee.id } } 
+        });
+        if (existingUser) {
+            throw new Error('El empleado ya tiene un usuario.');
+        }
+
+        // Actualizar el email en el registro del empleado
+        await this.employeesService.update(employee.id, { email });
+
+        // Crear el usuario
+        const salt = await bcrypt.genSalt();
+        const passwordHash = await bcrypt.hash(pass, salt);
+        
+        const user = this.usersRepository.create({
+            username: dni, // Usamos el DNI como nombre de usuario por pedido
+            passwordHash,
+            role: Role.EMPLOYEE,
+            employee: { id: employee.id } as any,
+        });
+
+        return this.usersRepository.save(user);
     }
 }

@@ -17,6 +17,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
 import EcologiaLogo from '@/components/EcologiaLogo';
+import api from '@/lib/api';
+import { Wrench } from 'lucide-react';
+import ChangelogModal from '@/components/ChangelogModal';
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
@@ -38,6 +41,14 @@ export default function AdminLayout({
     const router = useRouter();
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [authChecked, setAuthChecked] = useState(false);
+    const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
+
+    // Initial check for maintenance mode
+    useEffect(() => {
+        api.get('/maintenance/status')
+            .then(res => setMaintenanceEnabled(res.data.enabled))
+            .catch(err => console.error(err));
+    }, []);
 
     // Guard: si no hay token → redirigir al login
     useEffect(() => {
@@ -52,6 +63,19 @@ export default function AdminLayout({
     const handleLogout = () => {
         localStorage.removeItem('token');
         router.push('/login');
+    };
+
+    const toggleMaintenance = async () => {
+        const newState = !maintenanceEnabled;
+        if (newState && !confirm('¿Estás seguro de activar el modo mantenimiento? Los empleados no podrán acceder al portal.')) return;
+        
+        try {
+            await api.post('/maintenance/toggle', { enabled: newState });
+            setMaintenanceEnabled(newState);
+        } catch (error) {
+            console.error(error);
+            alert('Error al cambiar el estado de mantenimiento. Verificá tu conexión y permisos.');
+        }
     };
 
     if (!authChecked) {
@@ -123,7 +147,17 @@ export default function AdminLayout({
                     >
                         <Menu size={22} />
                     </button>
-                    <div className="text-sm text-eco-500 font-medium">Panel de Administración</div>
+                    <div className="flex items-center gap-4">
+                        <div className="text-sm text-eco-500 font-medium hidden sm:block">Panel de Administración</div>
+                        <button
+                            onClick={toggleMaintenance}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${maintenanceEnabled ? 'bg-amber-100 text-amber-700 border border-amber-300 shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 border border-transparent'}`}
+                            title="Activar/Desactivar Mantenimiento"
+                        >
+                            <Wrench size={16} />
+                            <span className="hidden sm:inline">{maintenanceEnabled ? 'Mantenimiento ACTIVO' : 'Mantenimiento OFF'}</span>
+                        </button>
+                    </div>
                     <div className="flex items-center gap-3">
                         <NotificationBell target="admin" />
                         <div className="w-8 h-8 rounded-full bg-eco-100 flex items-center justify-center text-eco-700 font-bold text-xs border border-eco-200">
@@ -143,6 +177,8 @@ export default function AdminLayout({
                     {children}
                 </main>
             </div>
+            
+            <ChangelogModal />
         </div>
     );
 }

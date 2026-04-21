@@ -276,9 +276,11 @@ export class ReportsService {
         });
 
         const report = Object.values(employees).map((data: any) => {
-            const workingDays = data.stats.present + data.stats.absent;
-            const avg = workingDays > 0
-                ? (data.stats.totalHours / workingDays).toFixed(2)
+            // Use only days where the employee was actually PRESENT for the average
+            // This excludes weekends (OFF), holidays, licenses, and absences
+            const daysWorked = data.stats.daysWorkedForAverage;
+            const avg = daysWorked > 0
+                ? (data.stats.totalHours / daysWorked).toFixed(2)
                 : 0;
 
             return {
