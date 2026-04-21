@@ -8,6 +8,7 @@ RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS production
+RUN apk add --no-cache tzdata
 WORKDIR /app
 
 ENV NODE_ENV=production
