@@ -23,56 +23,84 @@ export class AttendanceProcessorService {
     ) { }
 
     async processDay(dateStr: string) {
-        this.logger.log(`Processing attendance for ${dateStr}...`);
+        this.logger.log(`Processing attendance for ${dateStr} (Batch mode)...`);
 
-        // 1. Get all active employees
         const employees = await this.employeesService.findAll();
-
+        
         // 2. Define day range safely
-        // dateStr is YYYY-MM-DD
+        // In ART (GMT-3): 00:00 ART is 03:00 UTC.
+        // We use local container time which is ART.
         const startOfDay = new Date(`${dateStr}T00:00:00.000`);
         const endOfDay = new Date(`${dateStr}T23:59:59.999`);
+        
+        this.logger.debug(`Query window (ISO): ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
 
-        for (const emp of employees) {
-            // Find existing daily record or create new
-            let daily = await this.dailyRepo.findOne({
-                where: { employee: { id: emp.id }, date: dateStr },
+        // 3. Fetch all required data for the day
+        const [allEvents, allDaily, allLeaves, holiday] = await Promise.all([
+            this.eventsRepo.find({
+                where: { timestamp: Between(startOfDay, endOfDay) },
+                relations: ['employee'],
+                order: { timestamp: 'ASC' }
+            }),
+            this.dailyRepo.find({
+                where: { date: dateStr },
                 relations: ['employee']
-            });
+            }),
+            this.leaveRequestsService.getApprovedLeavesForDay(dateStr),
+            this.holidaysService.findByDate(dateStr)
+        ]);
 
+        this.logger.log(`Fetched Data: Events=${allEvents.length}, Samples=${allDaily.length}, Leaves=${allLeaves.length}, Holiday=${!!holiday}`);
+
+        // 4. Group data by employeeId for fast lookup
+        const eventsMap = new Map<string, AttendanceEvent[]>();
+        allEvents.forEach(ev => {
+            if (!ev.employee) return;
+            const list = eventsMap.get(ev.employee.id) || [];
+            list.push(ev);
+            eventsMap.set(ev.employee.id, list);
+        });
+
+        const dailyMap = new Map<string, DailyAttendance>();
+        allDaily.forEach(d => {
+            if (d.employee) dailyMap.set(d.employee.id, d);
+        });
+
+        const leavesMap = new Map<string, any>();
+        allLeaves.forEach(l => {
+            if (l.employee) leavesMap.set(l.employee.id, l);
+        });
+
+        const recordsToSave: DailyAttendance[] = [];
+
+        // 5. Process each employee
+        for (const emp of employees) {
+            let daily = dailyMap.get(emp.id);
             if (!daily) {
                 daily = new DailyAttendance();
                 daily.employee = emp;
                 daily.date = dateStr;
+                daily.meta = {};
             }
 
-            // Find events for this employee on this day
-            const events = await this.eventsRepo.find({
-                where: {
-                    employee: { id: emp.id },
-                    timestamp: Between(startOfDay, endOfDay)
-                },
-                order: { timestamp: 'ASC' }
-            });
-
-            // Check for Approved Leave
-            const approvedLeave = await this.leaveRequestsService.getApprovedLeave(emp.id, dateStr);
+            const events = eventsMap.get(emp.id) || [];
+            const approvedLeave = leavesMap.get(emp.id);
 
             if (approvedLeave) {
-                // If they have an approved leave, their status is definitively LICENSE
                 daily.status = 'LICENSE';
                 daily.isAbsent = false;
-                daily.meta = { ...daily.meta, leaveTypeId: approvedLeave.type.id, leaveTypeName: approvedLeave.type.name };
+                daily.meta = { 
+                    ...daily.meta, 
+                    leaveTypeId: approvedLeave.type?.id, 
+                    leaveTypeName: approvedLeave.type?.name 
+                };
 
-                // Track their hours anyway if they inexplicably badged in
                 if (events.length > 0) {
                     daily.inTime = events[0].timestamp;
                     daily.outTime = events.length > 1 ? events[events.length - 1].timestamp : null;
                     if (daily.outTime && daily.inTime) {
                         const diffMs = daily.outTime.getTime() - daily.inTime.getTime();
                         daily.hoursWorked = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2));
-                    } else {
-                        daily.hoursWorked = 0;
                     }
                 } else {
                     daily.inTime = null;
@@ -80,17 +108,14 @@ export class AttendanceProcessorService {
                     daily.hoursWorked = 0;
                 }
             } else if (events.length === 0) {
-                // No approved leave & no events -> check if holiday, then weekend, then absent
-                const holiday = await this.holidaysService.findByDate(dateStr);
-
                 if (holiday) {
                     daily.status = 'HOLIDAY';
                     daily.isAbsent = false;
                     daily.meta = { ...daily.meta, holidayName: holiday.description };
                 } else {
                     const dateObj = new Date(dateStr + 'T12:00:00');
-                    const day = dateObj.getDay();
-                    if (day === 0 || day === 6) { // Sunday or Saturday
+                    const dayOfWeek = dateObj.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
                         daily.status = 'OFF';
                         daily.isAbsent = false;
                     } else {
@@ -102,24 +127,21 @@ export class AttendanceProcessorService {
                 daily.outTime = null;
                 daily.hoursWorked = 0;
             } else {
-                // Normal working day
                 daily.status = 'PRESENT';
                 daily.isAbsent = false;
                 daily.inTime = events[0].timestamp;
 
-                // Deduplicate exit punch: Must be at least 10 minutes later than inTime
+                // Deduplicate exit punch
                 let latestValidExit: Date | null = null;
                 for (let i = events.length - 1; i > 0; i--) {
                     const timeDiffMs = events[i].timestamp.getTime() - events[0].timestamp.getTime();
-                    if (timeDiffMs > 10 * 60 * 1000) { // 10 minutes
+                    if (timeDiffMs > 10 * 60 * 1000) {
                         latestValidExit = events[i].timestamp;
                         break;
                     }
                 }
-
                 daily.outTime = latestValidExit;
 
-                // Calculate hours
                 if (daily.outTime && daily.inTime) {
                     const diffMs = daily.outTime.getTime() - daily.inTime.getTime();
                     daily.hoursWorked = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2));
@@ -127,11 +149,15 @@ export class AttendanceProcessorService {
                     daily.hoursWorked = 0;
                 }
             }
-
-            await this.dailyRepo.save(daily);
+            recordsToSave.push(daily);
         }
 
-        this.logger.log(`Finished processing ${dateStr}`);
+        // 6. Batch save
+        if (recordsToSave.length > 0) {
+            await this.dailyRepo.save(recordsToSave);
+        }
+
+        this.logger.log(`Finished processing ${dateStr}. Total records: ${recordsToSave.length}`);
     }
 
     /**

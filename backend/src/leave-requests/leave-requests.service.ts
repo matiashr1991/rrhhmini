@@ -102,6 +102,15 @@ export class LeaveRequestsService {
             .getOne();
     }
 
+    async getApprovedLeavesForDay(date: string): Promise<LeaveRequest[]> {
+        return this.leaveRepository.createQueryBuilder('leave')
+            .leftJoinAndSelect('leave.type', 'type')
+            .leftJoinAndSelect('leave.employee', 'employee')
+            .where('leave.status = :approved', { approved: LeaveStatus.APPROVED })
+            .andWhere(':date BETWEEN leave.startDate AND leave.endDate', { date })
+            .getMany();
+    }
+
     findAll(): Promise<LeaveRequest[]> {
         return this.leaveRepository.find({
             order: { createdAt: 'DESC' },
