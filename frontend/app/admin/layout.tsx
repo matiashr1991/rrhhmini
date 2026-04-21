@@ -19,6 +19,7 @@ import NotificationBell from '@/components/NotificationBell';
 import EcologiaLogo from '@/components/EcologiaLogo';
 import api from '@/lib/api';
 import { Wrench } from 'lucide-react';
+import ChangelogModal from '@/components/ChangelogModal';
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
@@ -176,6 +177,8 @@ export default function AdminLayout({
                     {children}
                 </main>
             </div>
+            
+            <ChangelogModal />
         </div>
     );
 }

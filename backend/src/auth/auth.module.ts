@@ -9,12 +9,14 @@ import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { User } from './user.entity';
 import { AuditModule } from '../audit/audit.module';
+import { EmployeesModule } from '../employees/employees.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User]),
         PassportModule,
         AuditModule,
+        EmployeesModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({

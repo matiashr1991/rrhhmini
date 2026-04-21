@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Menu, X, Clock } from 'lucide-react';
+import { LogOut, User, Menu, X, Clock, CalendarCheck } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import EcologiaLogo from '@/components/EcologiaLogo';
 import MaintenanceGuard from '@/components/MaintenanceGuard';
+import ChangelogModal from '@/components/ChangelogModal';
 
 export default function PortalLayout({
     children,
@@ -85,11 +86,23 @@ export default function PortalLayout({
                         </Link>
                         <Link
                             href="/portal/leaves"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-white bg-white/15 rounded-xl shadow-sm shadow-black/10 transition"
+                            className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition ${
+                                router.pathname === '/portal/leaves' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
+                            }`}
                             onClick={() => setSidebarOpen(false)}
                         >
                             <Clock size={19} />
                             Mis Licencias
+                        </Link>
+                        <Link
+                            href="/portal/attendance"
+                            className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition ${
+                                router.pathname === '/portal/attendance' ? 'text-white bg-white/15 shadow-sm shadow-black/10' : 'text-eco-200 hover:bg-white/8 hover:text-white'
+                            }`}
+                            onClick={() => setSidebarOpen(false)}
+                        >
+                            <CalendarCheck size={19} />
+                            Mis Asistencias
                         </Link>
                     </nav>
                     <div className="p-3 border-t border-white/10">
@@ -121,6 +134,8 @@ export default function PortalLayout({
                     <MaintenanceGuard>{children}</MaintenanceGuard>
                 </main>
             </div>
+
+            <ChangelogModal />
         </div>
     );
 }

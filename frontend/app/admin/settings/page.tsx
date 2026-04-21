@@ -338,19 +338,36 @@ export default function SettingsPage() {
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {editingUser ? 'Nueva Contraseña (dejar vacío para no cambiarla)' : 'Contraseña inicial'}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {editingUser ? 'Nueva Contraseña' : 'Contraseña inicial'}
                                 </label>
-                                <input
-                                    type="password"
-                                    required={!editingUser}
-                                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none"
-                                    placeholder={editingUser ? '(Sin cambios)' : 'Mínimo 4 caracteres'}
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    minLength={editingUser ? undefined : 4}
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        required={!editingUser}
+                                        className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-eco-600 outline-none pr-32"
+                                        placeholder={editingUser ? '(Sin cambios)' : 'Mínimo 4 caracteres'}
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                        minLength={editingUser ? undefined : 4}
+                                    />
+                                    {editingUser && editingUser.employee && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, password: editingUser.employee?.dni || '' })}
+                                            className="absolute right-2 top-1.5 px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded uppercase hover:bg-amber-200 transition"
+                                            title="Blanquear a DNI"
+                                        >
+                                            Blanquear a DNI
+                                        </button>
+                                    )}
+                                </div>
+                                {editingUser && (
+                                    <p className="text-[10px] text-gray-400 italic">
+                                        Dejá este campo vacío si solo querés cambiar el rol del usuario.
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-3 pt-2 border-t border-gray-100">

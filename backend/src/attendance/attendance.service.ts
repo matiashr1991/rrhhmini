@@ -134,4 +134,12 @@ export class AttendanceService {
         daily.isAbsent = status === 'ABSENT';
         return this.dailyRepo.save(daily);
     }
+
+    async findByEmployee(employeeId: string, limit: number = 30): Promise<AttendanceEvent[]> {
+        return this.eventsRepository.find({
+            where: { employee: { id: employeeId } },
+            order: { timestamp: 'DESC' },
+            take: limit,
+        });
+    }
 }

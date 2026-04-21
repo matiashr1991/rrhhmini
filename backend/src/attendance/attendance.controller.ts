@@ -22,6 +22,16 @@ export class AttendanceController {
         return this.attendanceService.findAll(req.query.date as string);
     }
 
+    @Get('my-attendance')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.EMPLOYEE, Role.ADMIN)
+    async findMyAttendance(@Req() req) {
+        if (!req.user.employeeId) {
+            throw new BadRequestException('Tu usuario no está vinculado a un empleado.');
+        }
+        return this.attendanceService.findByEmployee(req.user.employeeId);
+    }
+
     @Get('daily')
     async getDaily(@Req() req) {
         const date = req.query.date || new Date().toISOString().split('T')[0];
