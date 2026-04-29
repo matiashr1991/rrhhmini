@@ -42,6 +42,18 @@ export class EmployeesService {
         });
     }
 
+    findAllActive(): Promise<Employee[]> {
+        return this.employeesRepository.find({
+            where: { isActive: true },
+            order: { lastName: 'ASC', firstName: 'ASC' },
+            relations: [
+                'category', 'jurisdiction', 'gender', 'maritalStatus',
+                'orgUnit', 'grouping', 'plantType1', 'plantType2',
+                'functionArea', 'workplace', 'retirementStatus'
+            ]
+        });
+    }
+
     findOne(id: string): Promise<Employee | null> {
         return this.employeesRepository.findOne({
             where: { id },

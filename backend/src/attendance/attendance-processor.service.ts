@@ -25,7 +25,7 @@ export class AttendanceProcessorService {
     async processDay(dateStr: string) {
         this.logger.log(`Processing attendance for ${dateStr} (Batch mode)...`);
 
-        const employees = await this.employeesService.findAll();
+        const employees = await this.employeesService.findAllActive();
         
         // Define local day range (handled by server's America/Argentina/Buenos_Aires TZ)
         // We use the exact format that worked before 20/04
@@ -211,7 +211,7 @@ export class AttendanceProcessorService {
 
     async getDailyReport(dateStr: string) {
         return this.dailyRepo.find({
-            where: { date: dateStr },
+            where: { date: dateStr, employee: { isActive: true } },
             relations: ['employee'],
             order: { employee: { lastName: 'ASC' } }
         });
@@ -220,7 +220,8 @@ export class AttendanceProcessorService {
     async getMonthlyAttendance(startStr: string, endStr: string) {
         return this.dailyRepo.find({
             where: {
-                date: Between(startStr, endStr)
+                date: Between(startStr, endStr),
+                employee: { isActive: true }
             },
             relations: ['employee'],
             order: { date: 'ASC' }

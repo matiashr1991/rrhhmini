@@ -76,7 +76,7 @@ export class ReportsService {
     }
 
     async getDashboardStats() {
-        const employees = await this.employeesService.findAll();
+        const employees = await this.employeesService.findAllActive();
         const totalEmployeesCount = employees.length;
 
         const allLeaves = await this.leaveRequestsService.findAll();
